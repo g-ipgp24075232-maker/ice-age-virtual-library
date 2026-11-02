@@ -233,6 +233,22 @@
     state.pinchLatched = false;
     await refreshCameraChoices();
     const track = stream.getVideoTracks()[0];
+    if (track) {
+      track.addEventListener("ended", () => {
+        if (state.stream !== stream) return; // Intentional switch/stop is not a failure.
+        state.active = false;
+        if (state.animation) cancelAnimationFrame(state.animation);
+        state.animation = 0;
+        startButton.disabled = false;
+        changeCameraButton.disabled = false;
+        stopButton.disabled = false;
+        status("⚠️ Pelayar atau sistem telah menghentikan kamera. Tekan Mula Kamera Selfie untuk sambung semula.");
+        setDiagnostic("Camera track ended unexpectedly. Label: " + (track.label || "unknown") +
+          "; readyState: " + track.readyState +
+          "; visibility: " + document.visibilityState +
+          "; browser: " + navigator.userAgent);
+      });
+    }
     const detected = track && track.getSettings && track.getSettings().facingMode;
     const expectation = selected === "front" ? "user" : selected === "rear" ? "environment" : "";
     if (expectation && detected && detected !== expectation) {
@@ -280,7 +296,15 @@
     status("Langkah 1/4: Meminta kebenaran kamera…");
     setDiagnostic("Langkah 1: menunggu kamera. Tiada bingkai video disimpan atau dihantar.");
     try {
-      await attachSelectedCamera();
+      if (state.stream && state.stream.active && video.srcObject === state.stream) {
+        // Keep the selfie preview running when retrying the AI model.
+        if (document.visibilityState === "visible") {
+          state.stream.getVideoTracks().forEach(track => { track.enabled = true; });
+        }
+        await video.play();
+      } else {
+        await attachSelectedCamera();
+      }
       stopButton.disabled = false;
       changeCameraButton.disabled = false;
       status("✅ Kamera aktif! Langkah 2/4: Memuat pustaka MediaPipe…");
@@ -448,8 +472,23 @@
           clearSelection();
         }
       } catch (error) {
-        stop();
-        status("Pengesanan gestur terhenti. Sila mulakan semula kamera.");
+        // A gesture-model crash must never close the pupil's selfie camera.
+        state.active = false;
+        state.start = null;
+        state.pinchAt = 0;
+        state.pinchLatched = false;
+        if (state.landmarker) {
+          try { state.landmarker.close(); } catch (_) {}
+        }
+        state.landmarker = null;
+        state.animation = 0;
+        startButton.disabled = false;
+        stopButton.disabled = !state.stream;
+        changeCameraButton.disabled = !state.stream;
+        setDiagnostic("Peringkat: tracking; " + trimMessage(errText(error)) +
+          "; webcam: " + (state.stream && state.stream.active ? "active" : "inactive") +
+          "; browser: " + navigator.userAgent);
+        status("⚠️ Kamera selfie masih terbuka. Pengecaman gestur terganggu; tekan Mula Kamera Selfie untuk cuba semula.");
         console.error("MediaPipe detection:", error);
         return;
       }
@@ -470,11 +509,37 @@
     state.start = null;
   });
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden && state.active) {
-      stop();
-      status("Kamera dihentikan kerana tab tidak aktif.");
+    if (!state.stream) return;
+    if (document.hidden) {
+      // Do not stop the stream on mobile: permission prompts and temporary tab
+      // switches may cause visibilitychange even when the user did not press Stop.
+      state.stream.getVideoTracks().forEach(track => {
+        if (track.readyState === "live") track.enabled = false;
+      });
+      state.start = null;
+      status("⏸ Kamera selfie dijeda sementara tab tidak aktif. Kembali ke tab untuk sambung.");
+    } else {
+      const tracks = state.stream.getVideoTracks();
+      const live = tracks.some(track => track.readyState === "live");
+      if (live) {
+        tracks.forEach(track => { if (track.readyState === "live") track.enabled = true; });
+        video.play().catch(error => {
+          setDiagnostic("Video resume failed: " + errText(error));
+          status("⚠️ Tekan pada skrin, kemudian cuba Mula Kamera Selfie semula.");
+        });
+        status(state.active ? "✅ Kamera selfie disambung. Gesture Flip aktif."
+          : "✅ Kamera selfie disambung. Jika perlu, tekan Mula Kamera Selfie untuk aktifkan AI.");
+      } else {
+        state.active = false;
+        if (state.animation) cancelAnimationFrame(state.animation);
+        state.animation = 0;
+        startButton.disabled = false;
+        status("⚠️ Sistem telah menghentikan kamera di latar belakang. Tekan Mula Kamera Selfie untuk sambung.");
+      }
     }
   });
+  // Camera is fully released when leaving the site or pressing Stop, never just because
+  // visibility changed while the user is still on the same page.
   window.addEventListener("pagehide", stop);
   el("copyGestureError").addEventListener("click", async () => {
     const message = state.lastDiagnostic || el("gestureStatus").textContent;
