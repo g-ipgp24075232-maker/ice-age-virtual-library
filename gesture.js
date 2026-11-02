@@ -76,38 +76,18 @@
     return String(message || "").slice(0, 550);
   }
   async function importVision() {
-    // Each fallback uses its own matching WASM version to prevent mismatch.
-    const published = ["0.10.35", "0.10.32"];
-    const candidates = [];
-    for (const version of published) {
-      const base = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@" + version;
-      candidates.push({ url: base + "/vision_bundle.mjs", wasm: base + "/wasm", version });
-      candidates.push({ url: base + "/+esm", wasm: base + "/wasm", version });
+    // Downloaded by GitHub Actions at build time, served from this same GitHub Pages origin.
+    const siteRoot = new URL("./", location.href);
+    const base = new URL("vendor/mediapipe/", siteRoot);
+    const moduleUrl = new URL("vision_bundle.mjs", base).href;
+    const api = await import(moduleUrl);
+    if (!api || !api.FilesetResolver || !api.HandLandmarker) {
+      throw new Error("Pustaka MediaPipe yang diterbitkan tidak lengkap: " + moduleUrl);
     }
-    const secondBase = "https://unpkg.com/@mediapipe/tasks-vision@0.10.35";
-    candidates.push({
-      url: secondBase + "/vision_bundle.mjs",
-      wasm: secondBase + "/wasm",
-      version: "0.10.35"
-    });
-    const errors = [];
-    for (const item of candidates) {
-      status("📦 Memuat MediaPipe " + item.version + " (" + (errors.length + 1) + "/" + candidates.length + ")…");
-      try {
-        const imported = await import(item.url);
-        const api = imported && imported.FilesetResolver && imported.HandLandmarker ?
-          imported : imported && imported.default;
-        if (!api || !api.FilesetResolver || !api.HandLandmarker) {
-          throw new Error("Modul tidak menyediakan FilesetResolver / HandLandmarker.");
-        }
-        state.libraryOrigin = item.url;
-        state.loadedVersion = item.version;
-        return { api, wasm: item.wasm };
-      } catch (error) {
-        errors.push(item.url + " : " + trimMessage(errText(error)));
-      }
-    }
-    throw new Error("MediaPipe tidak dapat dimuat daripada CDN. " + errors.join(" | "));
+    state.libraryOrigin = moduleUrl;
+    state.loadedVersion = VERSION;
+    return { api, wasm: new URL("wasm", base).href,
+      model: new URL("models/hand_landmarker.task", base).href };
   }
   function show() {
     panel.hidden = false;
@@ -329,7 +309,7 @@
       status("✅ WebAssembly tersedia. Langkah 4/4: Memuat model pengecaman tangan…");
       phase = "model";
       state.landmarker = await loaded.api.HandLandmarker.createFromOptions(files, {
-        baseOptions: { modelAssetPath: MODEL, delegate: "CPU" },
+        baseOptions: { modelAssetPath: loaded.model, delegate: "CPU" },
         runningMode: "VIDEO",
         numHands: 1,
         minHandDetectionConfidence: 0.55,
@@ -376,7 +356,7 @@
         stopButton.disabled = false;
         changeCameraButton.disabled = false;
         const advice = phase === "library"
-          ? "Pustaka MediaPipe gagal dimuat. Cuba internet lain, matikan sekatan CDN, atau lihat Diagnostik."
+          ? "Fail MediaPipe belum tersedia di laman ini. Semak status deploy GitHub Actions."
           : phase === "wasm"
             ? "WebAssembly MediaPipe gagal dimuat. Semak sambungan dan sekatan fail .wasm."
             : "Model tangan gagal dimuat. Semak akses ke storage.googleapis.com.";
