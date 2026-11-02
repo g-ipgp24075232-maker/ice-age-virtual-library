@@ -8,7 +8,8 @@
   const state = {
     active: false, loading: false, stream: null, landmarker: null, animation: 0,
     videoTime: -1, sampleAt: 0, lastAction: 0, start: null,
-    pinchAt: 0, pinchLatched: false, chosenBook: 0, mirrored: true
+    pinchAt: 0, pinchLatched: false, chosenBook: 0, mirrored: true,
+    lastDiagnostic: "", libraryOrigin: "", lastErrorPhase: ""
   };
   const css = document.createElement("style");
   css.textContent =
@@ -39,6 +40,7 @@
     '<p class="gesture-hint">Kamera hanya aktif selepas anda menekan Mula Kamera. Video diproses pada peranti; laman ini tidak merakam atau memuat naik video. Model dan pustaka dimuat turun melalui internet.</p>' +
     '<video id="gestureVideo" autoplay playsinline muted aria-label="Pratonton kamera" style="transform:scaleX(-1)"></video>' +
     '<p id="gestureStatus" class="gesture-status" role="status" aria-live="polite">Kamera belum diaktifkan.</p>' +
+    '<details><summary>🔧 Diagnostik / Butiran ralat</summary><p id="gestureDiagnostic" class="gesture-hint">Belum ada pemeriksaan.</p><button id="copyGestureError" class="secondary" type="button">📋 Salin mesej ralat</button></details>' +
     '<div><button id="startGesture">📷 Mula Kamera</button><button id="stopGesture" class="secondary" disabled>⏹ Henti Kamera</button></div>' +
     '<div><label>Sensitiviti <input id="gestureSensitivity" type="range" min="10" max="26" value="17" step="1" aria-label="Kepekaan sapuan tangan"></label>' +
     '<label><input id="gestureMirror" type="checkbox" checked> Paparan cermin</label></div>' +
@@ -52,9 +54,46 @@
   const sens = el("gestureSensitivity");
   const closeButton = el("closeGesturePanel");
   const mirror = el("gestureMirror");
+  const diagnostic = el("gestureDiagnostic");
 
   function status(message) {
     el("gestureStatus").textContent = message;
+  }
+  function setDiagnostic(message) {
+    state.lastDiagnostic = String(message || "");
+    diagnostic.textContent = state.lastDiagnostic;
+  }
+  function errText(error) {
+    const name = error && error.name || "Error";
+    const message = error && error.message || String(error || "Unknown error");
+    return name + ": " + message;
+  }
+  function trimMessage(message) {
+    return String(message || "").slice(0, 550);
+  }
+  async function importVision() {
+    const candidates = [
+      { url: CDN + "/vision_bundle.mjs", wasm: CDN + "/wasm" },
+      { url: CDN + "/+esm", wasm: CDN + "/wasm" },
+      { url: "https://unpkg.com/@mediapipe/tasks-vision@" + VERSION + "/vision_bundle.mjs",
+        wasm: "https://unpkg.com/@mediapipe/tasks-vision@" + VERSION + "/wasm" }
+    ];
+    const errors = [];
+    for (const item of candidates) {
+      try {
+        const imported = await import(item.url);
+        const api = imported && imported.FilesetResolver && imported.HandLandmarker ?
+          imported : imported && imported.default;
+        if (!api || !api.FilesetResolver || !api.HandLandmarker) {
+          throw new Error("Modul tidak mengeksport FilesetResolver / HandLandmarker.");
+        }
+        state.libraryOrigin = item.url;
+        return { api: api, wasm: item.wasm };
+      } catch (e) {
+        errors.push(item.url + " : " + trimMessage(errText(e)));
+      }
+    }
+    throw new Error("Gagal memuatkan pustaka MediaPipe dari CDN. " + errors.join(" | "));
   }
   function show() {
     panel.hidden = false;
@@ -94,23 +133,39 @@
   async function start() {
     if (state.active || state.loading) return;
     if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      status("Kamera memerlukan HTTPS / localhost dan pelayar yang menyokong getUserMedia. Gunakan GitHub Pages.");
+      status("Kamera memerlukan HTTPS atau localhost. Buka laman GitHub Pages secara terus dalam Chrome atau Edge.");
+      setDiagnostic("Konteks selamat: " + window.isSecureContext +
+        "; mediaDevices: " + !!navigator.mediaDevices +
+        "; URL: " + location.origin + "; browser: " + navigator.userAgent);
       return;
     }
     state.loading = true;
+    state.lastErrorPhase = "";
     startButton.disabled = true;
-    status("Meminta kebenaran kamera…");
+    let phase = "camera";
+    status("Langkah 1/4: Meminta kebenaran kamera…");
+    setDiagnostic("Langkah 1: menunggu kamera. Tiada bingkai video disimpan atau dihantar.");
     try {
-      state.stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }
-      });
+      if (!state.stream || !state.stream.active) {
+        state.stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }
+        });
+      }
       video.srcObject = state.stream;
       await video.play();
-      status("Kamera aktif. Memuat turun model pengesanan tangan…");
-      const vision = await import(CDN + "/+esm");
-      const files = await vision.FilesetResolver.forVisionTasks(CDN + "/wasm");
-      state.landmarker = await vision.HandLandmarker.createFromOptions(files, {
+      stopButton.disabled = false;
+      status("✅ Kamera berfungsi! Langkah 2/4: Memuat pustaka MediaPipe…");
+      setDiagnostic("Kamera OK. Jika AI gagal, ini masalah model/CDN dan bukan kamera.");
+      phase = "library";
+      const loaded = await importVision();
+      status("✅ Kamera dan pustaka OK. Langkah 3/4: Menyediakan WebAssembly…");
+      setDiagnostic("Pustaka: " + loaded.api.HandLandmarker.name + "; sumber: " + state.libraryOrigin);
+      phase = "wasm";
+      const files = await loaded.api.FilesetResolver.forVisionTasks(loaded.wasm);
+      status("✅ WebAssembly tersedia. Langkah 4/4: Memuat model pengecaman tangan…");
+      phase = "model";
+      state.landmarker = await loaded.api.HandLandmarker.createFromOptions(files, {
         baseOptions: { modelAssetPath: MODEL, delegate: "CPU" },
         runningMode: "VIDEO",
         numHands: 1,
@@ -123,17 +178,46 @@
       state.sampleAt = 0;
       state.start = null;
       state.lastAction = 0;
+      startButton.disabled = true;
       stopButton.disabled = false;
-      status("✅ Sedia! Tunjukkan tapak tangan terbuka di hadapan kamera.");
+      setDiagnostic("OK: kamera, pustaka MediaPipe, WebAssembly dan model. Versi " + VERSION +
+        "; peranti: " + navigator.userAgent);
+      status("✅ Gesture Flip sedia! Sapu tangan ke kiri / kanan untuk membalik halaman.");
       loop();
-    } catch (err) {
-      const name = err && err.name ? err.name : "";
-      const message = name === "NotAllowedError" || name === "PermissionDeniedError"
-        ? "Kebenaran kamera ditolak. Benarkan kamera dalam tetapan pelayar dan cuba lagi."
-        : "Gagal memulakan pengecaman tangan. Semak sambungan internet, kamera, dan sokongan pelayar.";
-      stop();
-      status(message);
-      console.error("Ice Age gesture camera:", err);
+    } catch (error) {
+      state.lastErrorPhase = phase;
+      const details = "Peringkat: " + phase + "; " + trimMessage(errText(error)) +
+        "; halaman: " + location.origin +
+        "; MediaPipe: " + VERSION +
+        "; sumber: " + (state.libraryOrigin || "belum dimuat") +
+        "; browser: " + navigator.userAgent;
+      setDiagnostic(details);
+      console.error("Ice Age gesture initialization (" + phase + "):", error);
+      if (phase === "camera") {
+        stop();
+        const name = error && error.name || "";
+        const advice = name === "NotAllowedError" || name === "PermissionDeniedError"
+          ? "Kebenaran kamera ditolak. Benarkan kamera untuk laman ini dalam tetapan pelayar."
+          : name === "NotFoundError"
+            ? "Tiada kamera ditemui. Sambungkan kamera dan cuba lagi."
+            : name === "NotReadableError"
+              ? "Kamera sedang digunakan aplikasi lain. Tutup Zoom/Teams atau aplikasi kamera."
+              : "Kamera gagal diakses. Sila semak HTTPS, kebenaran dan sambungan peranti.";
+        status("❌ Langkah kamera gagal: " + advice);
+      } else {
+        // Keep the working webcam preview visible so an AI model failure is not mistaken for a camera failure.
+        state.active = false;
+        if (state.landmarker) { try { state.landmarker.close(); } catch (_) {} }
+        state.landmarker = null;
+        startButton.disabled = false;
+        stopButton.disabled = false;
+        const advice = phase === "library"
+          ? "Pustaka MediaPipe gagal dimuat. Cuba internet lain, matikan sekatan CDN, atau lihat Diagnostik."
+          : phase === "wasm"
+            ? "WebAssembly MediaPipe gagal dimuat. Semak sambungan dan sekatan fail .wasm."
+            : "Model tangan gagal dimuat. Semak akses ke storage.googleapis.com.";
+        status("⚠️ Kamera OK, tetapi Gesture Flip belum siap. " + advice);
+      }
     } finally {
       state.loading = false;
       if (!state.active) startButton.disabled = false;
@@ -262,5 +346,14 @@
     }
   });
   window.addEventListener("pagehide", stop);
+  el("copyGestureError").addEventListener("click", async () => {
+    const message = state.lastDiagnostic || el("gestureStatus").textContent;
+    try {
+      await navigator.clipboard.writeText(message);
+      status("📋 Diagnostik disalin. Boleh tampal dalam perbualan ChatGPT.");
+    } catch (_) {
+      prompt("Salin teks diagnostik ini:", message);
+    }
+  });
   window.IceGesture = { toggle, show, stop };
 })();
