@@ -9,7 +9,7 @@
     active: false, loading: false, stream: null, landmarker: null, animation: 0,
     videoTime: -1, sampleAt: 0, lastAction: 0, start: null,
     pinchAt: 0, pinchLatched: false, chosenBook: 0, mirrored: true,
-    lastDiagnostic: "", libraryOrigin: "", lastErrorPhase: ""
+    lastDiagnostic: "", libraryOrigin: "", lastErrorPhase: "", cameraChange: false, cameraVersion: 0
   };
   const css = document.createElement("style");
   css.textContent =
@@ -41,7 +41,8 @@
     '<video id="gestureVideo" autoplay playsinline muted aria-label="Pratonton kamera" style="transform:scaleX(-1)"></video>' +
     '<p id="gestureStatus" class="gesture-status" role="status" aria-live="polite">Kamera belum diaktifkan.</p>' +
     '<details><summary>🔧 Diagnostik / Butiran ralat</summary><p id="gestureDiagnostic" class="gesture-hint">Belum ada pemeriksaan.</p><button id="copyGestureError" class="secondary" type="button">📋 Salin mesej ralat</button></details>' +
-    '<div><button id="startGesture">📷 Mula Kamera</button><button id="stopGesture" class="secondary" disabled>⏹ Henti Kamera</button></div>' +
+    '<div><button id="startGesture">🤳 Mula Kamera Selfie</button><button id="stopGesture" class="secondary" disabled>⏹ Henti Kamera</button></div>' +
+    '<div class="field"><label for="gestureCameraSelect">Kamera / 摄像头</label><select id="gestureCameraSelect"><option value="front">🤳 Kamera depan / Selfie</option><option value="rear">📷 Kamera belakang</option></select><button id="changeGestureCamera" class="secondary" type="button" disabled>🔄 Tukar Kamera</button></div>' +
     '<div><label>Sensitiviti <input id="gestureSensitivity" type="range" min="10" max="26" value="17" step="1" aria-label="Kepekaan sapuan tangan"></label>' +
     '<label><input id="gestureMirror" type="checkbox" checked> Paparan cermin</label></div>' +
     '<p class="gesture-hint">Petua: pastikan pencahayaan terang, satu tangan kelihatan jelas, dan sapu tangan merentasi kamera dalam satu gerakan. Butang halaman dan skrin sentuh tetap boleh digunakan.</p>';
@@ -55,6 +56,8 @@
   const closeButton = el("closeGesturePanel");
   const mirror = el("gestureMirror");
   const diagnostic = el("gestureDiagnostic");
+  const cameraSelect = el("gestureCameraSelect");
+  const changeCameraButton = el("changeGestureCamera");
 
   function status(message) {
     el("gestureStatus").textContent = message;
@@ -111,6 +114,7 @@
   function stop() {
     state.active = false;
     state.loading = false;
+    state.cameraVersion++;
     if (state.animation) cancelAnimationFrame(state.animation);
     state.animation = 0;
     if (state.stream) state.stream.getTracks().forEach(track => track.stop());
@@ -127,7 +131,137 @@
     state.pinchLatched = false;
     startButton.disabled = false;
     stopButton.disabled = true;
+    changeCameraButton.disabled = true;
     clearSelection();
+  }
+
+
+  function cameraRole(label) {
+    if (/front|selfie|facetime|user.?facing|integrated|built.?in|depan|前置|自拍/i.test(label)) return "front";
+    if (/back|rear|environment|world.?facing|belakang|后置/i.test(label)) return "rear";
+    return "";
+  }
+  async function refreshCameraChoices() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+    try {
+      const previous = cameraSelect.value;
+      const devices = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput");
+      cameraSelect.innerHTML = "";
+      for (const [key, label] of [["front", "🤳 Kamera depan / Selfie"], ["rear", "📷 Kamera belakang"]]) {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = label;
+        cameraSelect.append(option);
+      }
+      devices.forEach((device, i) => {
+        if (!device.deviceId) return;
+        const option = document.createElement("option");
+        option.value = "device:" + device.deviceId;
+        option.textContent = "🎥 " + (device.label || "Kamera " + (i + 1));
+        cameraSelect.append(option);
+      });
+      if (Array.from(cameraSelect.options).some(o => o.value === previous)) cameraSelect.value = previous;
+      const track = state.stream && state.stream.getVideoTracks()[0];
+      const label = track && track.label || "";
+      const mode = track && track.getSettings && track.getSettings().facingMode || "";
+      setDiagnostic("Kamera digunakan: " + (label || "Tidak diketahui") + "; facingMode: " +
+        (mode || "tidak dilaporkan") + "; kamera tersedia: " + devices.length +
+        (state.lastErrorPhase ? "; ralat terakhir: " + state.lastErrorPhase : ""));
+    } catch (error) {
+      console.warn("Camera list:", error);
+    }
+  }
+  async function requestCamera(choice) {
+    const resolution = { width: { ideal: 640 }, height: { ideal: 480 } };
+    const constraints = choice.startsWith("device:")
+      ? [{ ...resolution, deviceId: { exact: choice.slice(7) } }]
+      : [{ ...resolution, facingMode: { exact: choice === "rear" ? "environment" : "user" } },
+         { ...resolution, facingMode: { ideal: choice === "rear" ? "environment" : "user" } },
+         resolution];
+    const errors = [];
+    for (const config of constraints) {
+      try {
+        let stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: config });
+        if (choice === "front" || choice === "rear") {
+          try {
+            const track = stream.getVideoTracks()[0];
+            const settings = track.getSettings ? track.getSettings() : {};
+            const list = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput");
+            const match = list.find(d => d.deviceId && cameraRole(d.label) === choice);
+            const actual = list.find(d => d.deviceId === settings.deviceId);
+            if (match && match.deviceId !== settings.deviceId && cameraRole(actual && actual.label || "") !== choice) {
+              stream.getTracks().forEach(t => t.stop());
+              stream = await navigator.mediaDevices.getUserMedia({
+                audio: false, video: { ...resolution, deviceId: { exact: match.deviceId } }
+              });
+            }
+          } catch (e) {
+            // Camera has already been granted: camera detection is best-effort.
+            // If automatic label matching fails, let the user select it manually below.
+            if (!stream.active) throw e;
+          }
+        }
+        return stream;
+      } catch (err) {
+        errors.push(errText(err));
+      }
+    }
+    throw new Error("Tidak dapat membuka kamera yang dipilih. " + errors.join(" | "));
+  }
+  async function attachSelectedCamera() {
+    const selected = cameraSelect.value || "front";
+    // Stop the previous track before switching. Some phones cannot use both cameras at once.
+    if (state.stream) state.stream.getTracks().forEach(t => t.stop());
+    state.stream = null;
+    video.pause();
+    video.srcObject = null;
+    const stream = await requestCamera(selected);
+    state.stream = stream;
+    video.srcObject = stream;
+    try {
+      await video.play();
+    } catch (error) {
+      stream.getTracks().forEach(t => t.stop());
+      state.stream = null;
+      video.srcObject = null;
+      throw error;
+    }
+    state.videoTime = -1;
+    state.sampleAt = 0;
+    state.start = null;
+    state.pinchAt = 0;
+    state.pinchLatched = false;
+    await refreshCameraChoices();
+    const track = stream.getVideoTracks()[0];
+    const detected = track && track.getSettings && track.getSettings().facingMode;
+    const expectation = selected === "front" ? "user" : selected === "rear" ? "environment" : "";
+    if (expectation && detected && detected !== expectation) {
+      status("⚠️ Kamera terbuka, tetapi pelayar memilih kamera lain. Pilih nama kamera yang betul dalam menu Kamera.");
+    }
+    return stream;
+  }
+  async function changeCamera() {
+    if (state.loading || state.cameraChange) return;
+    state.cameraChange = true;
+    changeCameraButton.disabled = true;
+    const ready = state.active;
+    status("🔄 Menukar kamera...");
+    try {
+      await attachSelectedCamera();
+      status(ready ? "✅ Kamera ditukar! Gesture Flip sedia digunakan."
+        : "✅ Kamera ditukar. Tekan Mula Kamera Selfie untuk cuba memuatkan model gestur.");
+    } catch (error) {
+      state.active = false;
+      if (state.animation) cancelAnimationFrame(state.animation);
+      state.animation = 0;
+      setDiagnostic("Pertukaran kamera gagal: " + errText(error));
+      status("❌ Tidak dapat menukar kamera. Sila pilih kamera lain.");
+      startButton.disabled = false;
+      stopButton.disabled = !state.stream;
+    } finally {
+      state.cameraChange = false;
+      changeCameraButton.disabled = !state.stream;
+    }
   }
 
   async function start() {
@@ -146,16 +280,10 @@
     status("Langkah 1/4: Meminta kebenaran kamera…");
     setDiagnostic("Langkah 1: menunggu kamera. Tiada bingkai video disimpan atau dihantar.");
     try {
-      if (!state.stream || !state.stream.active) {
-        state.stream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }
-        });
-      }
-      video.srcObject = state.stream;
-      await video.play();
+      await attachSelectedCamera();
       stopButton.disabled = false;
-      status("✅ Kamera berfungsi! Langkah 2/4: Memuat pustaka MediaPipe…");
+      changeCameraButton.disabled = false;
+      status("✅ Kamera aktif! Langkah 2/4: Memuat pustaka MediaPipe…");
       setDiagnostic("Kamera OK. Jika AI gagal, ini masalah model/CDN dan bukan kamera.");
       phase = "library";
       const loaded = await importVision();
@@ -211,6 +339,7 @@
         state.landmarker = null;
         startButton.disabled = false;
         stopButton.disabled = false;
+        changeCameraButton.disabled = false;
         const advice = phase === "library"
           ? "Pustaka MediaPipe gagal dimuat. Cuba internet lain, matikan sekatan CDN, atau lihat Diagnostik."
           : phase === "wasm"
@@ -329,6 +458,7 @@
   }
 
   startButton.addEventListener("click", start);
+  changeCameraButton.addEventListener("click", changeCamera);
   stopButton.addEventListener("click", () => {
     stop();
     status("Kamera dihentikan. Tiada bingkai video disimpan.");
@@ -355,5 +485,5 @@
       prompt("Salin teks diagnostik ini:", message);
     }
   });
-  window.IceGesture = { toggle, show, stop };
+  window.IceGesture = { toggle, show, stop, changeCamera };
 })();
