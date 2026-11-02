@@ -2,14 +2,15 @@
    Uses MediaPipe Hand Landmarker. Camera frames stay on this device. */
 (function () {
   "use strict";
-  const VERSION = "0.10.22";
+  // Use a stable published NPM release; 0.10.22 was only published as an RC.
+  const VERSION = "0.10.35";
   const CDN = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@" + VERSION;
   const MODEL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
   const state = {
     active: false, loading: false, stream: null, landmarker: null, animation: 0,
     videoTime: -1, sampleAt: 0, lastAction: 0, start: null,
     pinchAt: 0, pinchLatched: false, chosenBook: 0, mirrored: true,
-    lastDiagnostic: "", libraryOrigin: "", lastErrorPhase: "", cameraChange: false, cameraVersion: 0
+    lastDiagnostic: "", libraryOrigin: "", loadedVersion: "", lastErrorPhase: "", cameraChange: false, cameraVersion: 0
   };
   const css = document.createElement("style");
   css.textContent =
@@ -75,28 +76,38 @@
     return String(message || "").slice(0, 550);
   }
   async function importVision() {
-    const candidates = [
-      { url: CDN + "/vision_bundle.mjs", wasm: CDN + "/wasm" },
-      { url: CDN + "/+esm", wasm: CDN + "/wasm" },
-      { url: "https://unpkg.com/@mediapipe/tasks-vision@" + VERSION + "/vision_bundle.mjs",
-        wasm: "https://unpkg.com/@mediapipe/tasks-vision@" + VERSION + "/wasm" }
-    ];
+    // Each fallback uses its own matching WASM version to prevent mismatch.
+    const published = ["0.10.35", "0.10.32"];
+    const candidates = [];
+    for (const version of published) {
+      const base = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@" + version;
+      candidates.push({ url: base + "/vision_bundle.mjs", wasm: base + "/wasm", version });
+      candidates.push({ url: base + "/+esm", wasm: base + "/wasm", version });
+    }
+    const secondBase = "https://unpkg.com/@mediapipe/tasks-vision@0.10.35";
+    candidates.push({
+      url: secondBase + "/vision_bundle.mjs",
+      wasm: secondBase + "/wasm",
+      version: "0.10.35"
+    });
     const errors = [];
     for (const item of candidates) {
+      status("📦 Memuat MediaPipe " + item.version + " (" + (errors.length + 1) + "/" + candidates.length + ")…");
       try {
         const imported = await import(item.url);
         const api = imported && imported.FilesetResolver && imported.HandLandmarker ?
           imported : imported && imported.default;
         if (!api || !api.FilesetResolver || !api.HandLandmarker) {
-          throw new Error("Modul tidak mengeksport FilesetResolver / HandLandmarker.");
+          throw new Error("Modul tidak menyediakan FilesetResolver / HandLandmarker.");
         }
         state.libraryOrigin = item.url;
-        return { api: api, wasm: item.wasm };
-      } catch (e) {
-        errors.push(item.url + " : " + trimMessage(errText(e)));
+        state.loadedVersion = item.version;
+        return { api, wasm: item.wasm };
+      } catch (error) {
+        errors.push(item.url + " : " + trimMessage(errText(error)));
       }
     }
-    throw new Error("Gagal memuatkan pustaka MediaPipe dari CDN. " + errors.join(" | "));
+    throw new Error("MediaPipe tidak dapat dimuat daripada CDN. " + errors.join(" | "));
   }
   function show() {
     panel.hidden = false;
@@ -332,7 +343,7 @@
       state.lastAction = 0;
       startButton.disabled = true;
       stopButton.disabled = false;
-      setDiagnostic("OK: kamera, pustaka MediaPipe, WebAssembly dan model. Versi " + VERSION +
+      setDiagnostic("OK: kamera, pustaka MediaPipe, WebAssembly dan model. Versi " + state.loadedVersion +
         "; peranti: " + navigator.userAgent);
       status("✅ Gesture Flip sedia! Sapu tangan ke kiri / kanan untuk membalik halaman.");
       loop();
