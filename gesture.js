@@ -10,7 +10,8 @@
     active: false, loading: false, stream: null, landmarker: null, animation: 0,
     videoTime: -1, sampleAt: 0, lastAction: 0, start: null,
     pinchAt: 0, pinchLatched: false, chosenBook: 0, mirrored: true,
-    lastDiagnostic: "", libraryOrigin: "", loadedVersion: "", lastErrorPhase: "", cameraChange: false, cameraVersion: 0
+    lastDiagnostic: "", libraryOrigin: "", loadedVersion: "", lastErrorPhase: "", cameraChange: false, cameraVersion: 0,
+    grab: null, gestureCooldown: 0, noHandFrames: 0, releaseFrames: 0
   };
   const css = document.createElement("style");
   css.textContent =
@@ -28,6 +29,9 @@
     "#gesturePanel label{display:inline-flex;align-items:center;gap:5px;font-size:13px;margin:4px}" +
     "#gesturePanel input[type=range]{width:100px}" +
     ".book.gesture-focus{transform:translateY(-15px) scale(1.04);outline:5px solid #ffe56c;outline-offset:4px}" +
+    "#gestureGuide{margin:8px 0;padding:10px;border-radius:12px;background:#e6f5fe;color:#15537c}" +
+    "#gestureMeter{height:9px;border-radius:20px;background:#b8ddef;overflow:hidden;margin:7px 0}" +
+    "#gestureMeterFill{height:100%;width:0;background:linear-gradient(90deg,#6bbad9,#36a976);transition:width 70ms linear}" +
     "@media(max-width:600px){#gesturePanel{right:7px;bottom:7px;width:calc(100vw - 14px);max-height:85vh;overflow:auto}}";
   document.head.appendChild(css);
 
@@ -37,9 +41,11 @@
   panel.setAttribute("aria-label", "Panel kawalan gestur kamera");
   panel.innerHTML =
     '<div class="gesture-top"><strong>✋ Mod Gestur Tangan</strong><button id="closeGesturePanel" class="secondary" aria-label="Tutup panel">✕</button></div>' +
-    '<p class="gesture-hint">Gerakkan tapak tangan terbuka ke <b>kiri</b> untuk halaman seterusnya atau ke <b>kanan</b> untuk kembali. Di rak buku, gerakkan tangan untuk pilih buku, kemudian <b>cubit jari ibu dan telunjuk</b> sekejap untuk buka buku.</p>' +
+    '<p class="gesture-hint">📖 <b>Cara selak buku:</b> Rapatkan ibu jari dan telunjuk seperti mencubit pada <b>sebelah kanan</b> kamera, gerakkan tangan ke <b>kiri</b> sambil terus mencubit, kemudian <b>lepaskan jari</b>. Untuk halaman sebelumnya, mula di sebelah kiri dan seret ke kanan. Di rak buku, cubit untuk membuka buku.</p>' +
     '<p class="gesture-hint">Kamera hanya aktif selepas anda menekan Mula Kamera. Video diproses pada peranti; laman ini tidak merakam atau memuat naik video. Model dan pustaka dimuat turun melalui internet.</p>' +
     '<video id="gestureVideo" autoplay playsinline muted aria-label="Pratonton kamera" style="transform:scaleX(-1)"></video>' +
+    '<div id="gestureGuide" role="status" aria-live="polite">✋ Tunjukkan tangan. Cubit di sebelah kanan untuk mencengkam halaman.</div>' +
+    '<div id="gestureMeter"><div id="gestureMeterFill"></div></div>' +
     '<p id="gestureStatus" class="gesture-status" role="status" aria-live="polite">Kamera belum diaktifkan.</p>' +
     '<details><summary>🔧 Diagnostik / Butiran ralat</summary><p id="gestureDiagnostic" class="gesture-hint">Belum ada pemeriksaan.</p><button id="copyGestureError" class="secondary" type="button">📋 Salin mesej ralat</button></details>' +
     '<div><button id="startGesture">🤳 Mula Kamera Selfie</button><button id="stopGesture" class="secondary" disabled>⏹ Henti Kamera</button></div>' +
@@ -103,6 +109,7 @@
     document.querySelectorAll(".book.gesture-focus").forEach(x => x.classList.remove("gesture-focus"));
   }
   function stop() {
+    cancelGesture();
     state.active = false;
     state.loading = false;
     state.cameraVersion++;
@@ -252,6 +259,7 @@
     state.cameraChange = true;
     changeCameraButton.disabled = true;
     const ready = state.active;
+    cancelGesture();
     status("🔄 Menukar kamera...");
     try {
       await attachSelectedCamera();
@@ -397,53 +405,107 @@
       element.classList.toggle("gesture-focus", i === index);
     });
   }
+  function gestureHint(message, progress) {
+    const guide = el("gestureGuide");
+    if (guide && message && guide.textContent !== message) guide.textContent = message;
+    const meter = el("gestureMeterFill");
+    if (meter && progress !== undefined) {
+      meter.style.width = Math.round(Math.max(0,Math.min(1,progress))*100)+"%";
+    }
+  }
+  function cancelGesture() {
+    if (state.grab) {
+      try { window.IceFlipbook?.finishGesture(false); } catch (error) { console.warn(error); }
+    }
+    state.grab = null;
+    state.releaseFrames = 0;
+    gestureHint("✋ Cubit pada sebelah kanan untuk halaman seterusnya; sebelah kiri untuk sebelumnya.",0);
+  }
+  // Webcam preview is mirrored. x measures the thumb/index pinch point in that preview.
   function process(points, now) {
     if (!Array.isArray(points) || points.length < 21) return;
-    // Coordinates are mirrored to match the mirrored webcam preview.
-    const x = state.mirrored ? 1 - points[9].x : points[9].x;
-    const open = isOpenPalm(points);
+    const rawX = (points[4].x + points[8].x)*0.5;
+    const x = state.mirrored ? 1-rawX : rawX;
     const pinch = isPinching(points);
+    state.noHandFrames=0;
 
     if (shelving()) {
+      if (state.grab) cancelGesture();
       highlightBook(x);
-      state.start = null;
       if (pinch) {
-        if (!state.pinchAt) state.pinchAt = now;
-        if (!state.pinchLatched && now - state.pinchAt > 380 && now - state.lastAction > 1400) {
-          state.pinchLatched = true;
-          state.lastAction = now;
-          state.pinchAt = 0;
+        if (!state.pinchAt) state.pinchAt=now;
+        if (!state.pinchLatched && now-state.pinchAt>320 && now-state.lastAction>1250) {
+          state.pinchLatched=true;state.lastAction=now;state.pinchAt=0;
           clearSelection();
-          if (typeof openBook === "function") openBook(state.chosenBook);
-          status("📖 Buku dibuka! Sapu tangan terbuka untuk membalik halaman.");
+          if (typeof openBook==="function") openBook(state.chosenBook);
+          gestureHint("📖 Buku dibuka! Cubit di kanan, seret ke kiri dan lepaskan.",0);
         }
       } else {
-        state.pinchAt = 0;
-        state.pinchLatched = false;
+        state.pinchAt=0;
+        state.pinchLatched=false;
       }
       return;
     }
-
-    if (!reading() || !open || pinch) {
-      state.start = null;
+    if (!reading()) {
+      if (state.grab) cancelGesture();
+      state.start=null;
+      return;
+    }
+    const flip=window.IceFlipbook;
+    if (!flip || typeof flip.beginGesture!=="function") {
+      gestureHint("⚠️ Komponen selak buku belum dimuat. Muat semula halaman.",0);
       return;
     }
 
-    if (!state.start) {
-      state.start = { x: x, time: now };
+    // Existing grab is tracked across frames, independent of the open-palm swipe system.
+    if (state.grab) {
+      const grab=state.grab;
+      if (!pinch) {
+        state.releaseFrames++;
+        if(state.releaseFrames<2)return; // avoid a one-frame pinch jitter
+        const completed=grab.progress>=0.45;
+        flip.finishGesture(completed);
+        state.grab=null;
+        state.pinchLatched=true; // require open fingers before next grab
+        state.gestureCooldown=now+1050;
+        state.releaseFrames=0;
+        state.start=null;
+        gestureHint(completed?"✅ Halaman diselak! Sedia untuk selak lagi.":"↩️ Belum cukup jauh, halaman kembali.",0);
+        return;
+      }
+      state.releaseFrames=0;
+      // Pinch left/right stays attached to the page. Opposite movement retracts the page.
+      const traveled=grab.direction===1 ? grab.origin-x : x-grab.origin;
+      const progress=Math.max(0,Math.min(1,traveled/0.34));
+      grab.progress=grab.progress*0.18+progress*0.82;
+      flip.moveGesture(grab.progress);
+      gestureHint("📖 Halaman dipegang — terus seret, kemudian LEPASKAN jari!",grab.progress);
       return;
     }
-    const difference = x - state.start.x;
-    const elapsed = now - state.start.time;
-    const threshold = Number(sens.value) / 100;
-    if (Math.abs(difference) >= threshold && elapsed >= 120 && elapsed <= 1100 && now - state.lastAction >= 1300) {
-      const delta = difference < 0 ? 1 : -1;
-      state.lastAction = now;
-      state.start = null;
-      if (typeof changePage === "function") changePage(delta);
-      status(delta === 1 ? "➡️ Halaman seterusnya." : "⬅️ Halaman sebelumnya.");
-    } else if (elapsed > 1100) {
-      state.start = { x: x, time: now };
+    if(!pinch){
+      state.pinchLatched=false;
+      state.pinchAt=0;
+      state.releaseFrames=0;
+      return;
+    }
+    if(state.pinchLatched||now<state.gestureCooldown||flip.isBusy())return;
+    // Start near the visible book's page corner. Right side -> next, left side -> previous.
+    const direction=x>=0.54?1:x<=0.46?-1:0;
+    if(!direction){
+      gestureHint("↔️ Alihkan tangan ke sebelah kanan atau kiri sebelum mencubit.",0);
+      return;
+    }
+    if(!flip.canTurn(direction)){
+      gestureHint(direction===1?"📕 Ini halaman terakhir.":"📕 Ini halaman pertama.",0);
+      return;
+    }
+    if(!state.pinchAt)state.pinchAt=now;
+    if(now-state.pinchAt<140)return;
+    if(flip.beginGesture(direction)){
+      state.grab={origin:x,direction,progress:0};
+      state.releaseFrames=0;
+      state.start=null;
+      gestureHint(direction===1?"✊ Halaman dicengkam! Gerakkan tangan ke kiri.":"✊ Halaman dicengkam! Gerakkan tangan ke kanan.",0);
     }
   }
   function loop() {
@@ -457,12 +519,18 @@
         if (result.landmarks && result.landmarks.length) {
           process(result.landmarks[0], now);
         } else {
+          state.noHandFrames++;
+          if(state.grab && state.noHandFrames>8) {
+            cancelGesture();
+            state.gestureCooldown=now+800;
+          }
           state.start = null;
           state.pinchAt = 0;
-          state.pinchLatched = false;
+          if (!state.grab) state.pinchLatched = false;
           clearSelection();
         }
       } catch (error) {
+        cancelGesture();
         // A gesture-model crash must never close the pupil's selfie camera.
         state.active = false;
         state.start = null;
@@ -498,10 +566,12 @@
     state.mirrored = mirror.checked;
     video.style.transform = state.mirrored ? "scaleX(-1)" : "none";
     state.start = null;
+    cancelGesture();
   });
   document.addEventListener("visibilitychange", () => {
     if (!state.stream) return;
     if (document.hidden) {
+      cancelGesture();
       // Do not stop the stream on mobile: permission prompts and temporary tab
       // switches may cause visibilitychange even when the user did not press Stop.
       state.stream.getVideoTracks().forEach(track => {
