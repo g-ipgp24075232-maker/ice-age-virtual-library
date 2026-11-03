@@ -75,24 +75,84 @@ function textFields(){
   }
  }
 }
+// Trim transparent/white or single-colour padding around uploaded characters.
+// This improves how large the actual animal appears without altering its proportions.
+async function imageSourceToDataURL(source){
+ const img=await new Promise((resolve,reject)=>{
+  const im=new Image();
+  im.onload=()=>resolve(im);
+  im.onerror=()=>reject(new Error("图片读取失败。"));
+  im.src=source;
+ });
+ const maxSize=1500;
+ const scale=Math.min(1,maxSize/Math.max(img.naturalWidth,img.naturalHeight));
+ const canvas=document.createElement("canvas");
+ canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+ canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+ const cx=canvas.getContext("2d",{willReadFrequently:true});
+ cx.drawImage(img,0,0,canvas.width,canvas.height);
+ const w=canvas.width,h=canvas.height;
+ if(w<20||h<20)return canvas.toDataURL("image/webp",.82);
+ let pixels;
+ try{pixels=cx.getImageData(0,0,w,h).data;}catch(_){
+  throw new Error("外部图片禁止读取像素。请将图片保存后重新上传，或使用本地 PNG/JPG。");
+ }
+ const get=(x,y)=>{
+  const i=4*(Math.max(0,Math.min(h-1,y))*w+Math.max(0,Math.min(w-1,x)));
+  return [pixels[i],pixels[i+1],pixels[i+2],pixels[i+3]];
+ };
+ const off=Math.max(1,Math.min(10,Math.floor(Math.min(w,h)*.02)));
+ const corners=[get(off,off),get(w-1-off,off),get(off,h-1-off),get(w-1-off,h-1-off)];
+ const avg=[0,0,0,0];
+ corners.forEach(p=>p.forEach((v,k)=>avg[k]+=v/4));
+ const evenCorners=corners.every(c=>c.every((v,k)=>Math.abs(v-avg[k])<(k===3?36:27)));
+ const brightCorners=corners.every(c=>c[0]>235&&c[1]>235&&c[2]>235);
+ const transparentCorners=corners.every(c=>c[3]<40);
+ const isBlank=(index)=>{
+  const a=pixels[index+3],r=pixels[index],g=pixels[index+1],b=pixels[index+2];
+  if(a<28)return true;
+  if(brightCorners&&r>233&&g>233&&b>233)return true;
+  if(evenCorners&&!transparentCorners &&
+    Math.abs(r-avg[0])<23&&Math.abs(g-avg[1])<23&&Math.abs(b-avg[2])<23)return true;
+  return false;
+ };
+ let left=w,top=h,right=-1,bottom=-1;
+ for(let y=0;y<h;y+=2){
+  for(let x=0;x<w;x+=2){
+   const i=(y*w+x)*4;
+   if(isBlank(i))continue;
+   if(x<left)left=x;
+   if(y<top)top=y;
+   if(x>right)right=x;
+   if(y>bottom)bottom=y;
+  }
+ }
+ if(right<left||bottom<top)return canvas.toDataURL("image/webp",.82);
+ const pad=Math.ceil(Math.max(w,h)*.018);
+ left=Math.max(0,left-pad);
+ top=Math.max(0,top-pad);
+ right=Math.min(w,right+pad+2);
+ bottom=Math.min(h,bottom+pad+2);
+ const ww=right-left,hh=bottom-top;
+ const marginW=(w-ww)/w,marginH=(h-hh)/h;
+ const crop=marginW>.08||marginH>.08;
+ let saveCanvas=canvas;
+ if(crop){
+  const trimmed=document.createElement("canvas");
+  trimmed.width=ww;trimmed.height=hh;
+  trimmed.getContext("2d").drawImage(canvas,left,top,ww,hh,0,0,ww,hh);
+  saveCanvas=trimmed;
+ }
+ const data=saveCanvas.toDataURL("image/webp",.8);
+ if(data.length>1750000)throw Error("图片压缩后还是太大，请先缩小图片。");
+ return data;
+}
 async function imageToDataURL(file){
  if(!/^image\/(png|jpeg|webp)$/.test(file.type))throw Error("请上传 JPG、PNG 或 WebP。");
- if(file.size>9e6)throw Error("图像超过 9MB，请先压缩。");
+ if(file.size>9e6)throw Error("图片超过 9MB，请先压缩。");
  const url=URL.createObjectURL(file);
- let img;
- try{
-  img=await new Promise((resolve,reject)=>{
-   const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error("图片无法读取"));im.src=url;
-  });
- }finally{URL.revokeObjectURL(url);}
- const canvas=document.createElement("canvas");
- const scale=Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight));
- canvas.width=Math.round(img.naturalWidth*scale);
- canvas.height=Math.round(img.naturalHeight*scale);
- canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
- const data=canvas.toDataURL("image/webp",.75);
- if(data.length>1750000)throw Error("压缩后图片仍太大，请使用图片 URL。");
- return data;
+ try{return await imageSourceToDataURL(url);}
+ finally{URL.revokeObjectURL(url);}
 }
 function mediaFields(){
  const d=state();
@@ -112,6 +172,18 @@ function mediaFields(){
    catch(e){message("⚠️ "+e.message);}
   });
   upload.append(file);area.append(upload);
+  area.append(button("✂ 自动裁剪现有图片空白边缘",async()=>{
+   const current=state().images[key];
+   if(!current.startsWith("data:image/")){
+    message("⚠️ 只有已上传到编辑器的图片可以直接裁剪。若使用 URL，请先下载再上传。");
+    return;
+   }
+   try{
+    const processed=await imageSourceToDataURL(current);
+    core.update("images."+key,processed);
+    render();message("✅ 已处理图片边缘。调整大小滑块可进一步放大。");
+   }catch(error){message("⚠️ "+error.message);}
+  },true));
   area.append(button("↺ 恢复默认图片",()=>{core.update("images."+key,core.initial.images[key]);render();},true));
  }
  const audio=card(body,"🎼 自定义背景音乐");
@@ -142,7 +214,40 @@ function designFields(){
  input(effects,"动物动画",d.design.animalMotion?"yes":"no","select",v=>core.update("design.animalMotion",v==="yes"),[
   ["yes","动画"],["no","静止"]
  ]);
- input(effects,"动物大小 (%)",d.design.animalScale,"range",v=>core.update("design.animalScale",Number(v)),{min:50,max:160,step:10});
+ hint(effects,"✅ 已修复：新滑块改变图片真实宽度（不是只改变最大宽度）。大幅放大可达 500%，并为欢迎页与书架分别调整。数值 100% = 原本大小。");
+ const preview=make("div",null,"whole-animal-preview");
+ const mammoth=make("img"),tiger=make("img");
+ mammoth.alt="Mamot preview";tiger.alt="Harimau preview";
+ preview.append(mammoth,tiger);effects.append(preview);
+ function previewAnimals(){
+  const cfg=state();
+  mammoth.src=cfg.images.mammoth;
+  tiger.src=cfg.images.tiger;
+  // The panel preview is scaled proportionally to fit in the box;
+  // percentages match the actual scene so even large images remain visible.
+  mammoth.style.width=Math.round(120*cfg.design.animalScale*cfg.design.mammothSize/10000)+"px";
+  tiger.style.width=Math.round(100*cfg.design.animalScale*cfg.design.tigerSize/10000)+"px";
+ }
+ function adjust(label,key,options){
+  input(effects,label,state().design[key],"range",v=>{
+   core.update("design."+key,Number(v));
+   previewAnimals();
+  },options);
+ }
+ adjust("🌐 全部动物总大小 (%)", "animalScale",{min:30,max:500,step:10});
+ adjust("🦣 猛犸象：首页大小 (%)","mammothSize",{min:30,max:500,step:10});
+ adjust("🐅 剑齿虎：首页大小 (%)","tigerSize",{min:30,max:500,step:10});
+ adjust("🦣 猛犸象：书架大小 (%)","mammothLibrarySize",{min:30,max:500,step:10});
+ adjust("🐅 剑齿虎：书架大小 (%)","tigerLibrarySize",{min:30,max:500,step:10});
+ adjust("🦣 猛犸象：左右位置 (px)","mammothOffsetX",{min:-250,max:350,step:10});
+ adjust("🦣 猛犸象：上下位置 (px)","mammothOffsetY",{min:-150,max:250,step:10});
+ adjust("🐅 剑齿虎：左右位置 (px)","tigerOffsetX",{min:-250,max:350,step:10});
+ adjust("🐅 剑齿虎：上下位置 (px)","tigerOffsetY",{min:-150,max:250,step:10});
+ effects.append(button("👁 看首页实际大小",()=>{
+  if(typeof window.show==="function")window.show("welcome");
+  window.scrollTo({top:0,behavior:"smooth"});
+ },true));
+ previewAnimals();
  input(effects,"手势敏感度 (10–26)",d.design.gestureSensitivity,"range",v=>core.update("design.gestureSensitivity",Number(v)),{min:10,max:26,step:1});
  effects.append(button("🌬 预览暴风雪",()=>window.IceStoryWorld?.burst()));
 }
