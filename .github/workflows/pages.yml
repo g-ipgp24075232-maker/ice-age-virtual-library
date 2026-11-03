@@ -37,7 +37,7 @@ jobs:
           test -s "$PKG/vision_bundle.mjs"
           test -d "$PKG/wasm"
           mkdir -p site/vendor/mediapipe/models
-          cp index.html gesture.js flipbook.js soundscape.js site/
+          cp index.html gesture.js flipbook.js soundscape.js references.js site/
           cp "$PKG/vision_bundle.mjs" site/vendor/mediapipe/vision_bundle.mjs
           cp -R "$PKG/wasm" site/vendor/mediapipe/
           curl --fail --location --retry 4 --retry-all-errors --connect-timeout 25 --max-time 180 \
@@ -49,6 +49,7 @@ jobs:
           node --check gesture.js
           node --check flipbook.js
           node --check soundscape.js
+          node --check references.js
           node --check site/vendor/mediapipe/vision_bundle.mjs
           echo "Self-hosted MediaPipe assets and model validated."
           du -h site/vendor/mediapipe/vision_bundle.mjs site/vendor/mediapipe/models/hand_landmarker.task
