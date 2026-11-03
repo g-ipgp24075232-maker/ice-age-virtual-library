@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Landskap fantasi Zaman Air Batu, gunung bersalji dan gua ais">
+<defs>
+<linearGradient id="sky" x2=".1" y2="1"><stop stop-color="#174c83"/><stop offset=".37" stop-color="#619dc2"/><stop offset=".72" stop-color="#c7e3e4"/><stop offset="1" stop-color="#f8e6c7"/></linearGradient>
+<radialGradient id="glow"><stop stop-color="#fff8dd" stop-opacity=".97"/><stop offset=".45" stop-color="#fff2d5" stop-opacity=".49"/><stop offset="1" stop-color="#fff2da" stop-opacity="0"/></radialGradient>
+<linearGradient id="mount" x2=".9" y2="1"><stop stop-color="#edf6f2"/><stop offset=".5" stop-color="#92bfcd"/><stop offset="1" stop-color="#547fa8"/></linearGradient>
+<linearGradient id="snow" x2="0" y2="1"><stop stop-color="#f9ffff"/><stop offset=".6" stop-color="#d5eef0"/><stop offset="1" stop-color="#93c7dc"/></linearGradient>
+<linearGradient id="cave" x2=".1" y2="1"><stop stop-color="#5bacc5"/><stop offset=".44" stop-color="#abe6e9"/><stop offset="1" stop-color="#396e9e"/></linearGradient>
+<linearGradient id="door" x2=".2" y2="1"><stop stop-color="#2a6386"/><stop offset=".8" stop-color="#204663"/><stop offset="1" stop-color="#152f50"/></linearGradient>
+<filter id="soft"><feGaussianBlur stdDeviation="13"/></filter>
+<filter id="grain"><feTurbulence baseFrequency=".015" numOctaves="2" seed="7" stitchTiles="stitch" type="fractalNoise"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".045"/></feComponentTransfer></filter>
+<g id="pine"><path d="M0 90v-99" stroke="#4d6e7a" stroke-width="8" stroke-linecap="round"/><path d="M0-124-57-9h24l-47 54 32-5-30 36Q0 90 78 66L44 37l28 8-46-56h26Z" fill="#355f76"/><path d="M0-124-43-13l20-3-34 52 27-4-29 35" fill="none" stroke="#8dc7cf" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" opacity=".75"/><path d="m-43 4 25 6 26-7 26 8" fill="none" stroke="#eafaf1" stroke-width="7" stroke-linecap="round"/></g>
+<g id="star"><path d="M0-7v14M-7 0H7" stroke="#fffbe4" stroke-width="2.4" stroke-linecap="round" opacity=".7"/></g>
+</defs>
+<path fill="url(#sky)" d="M0 0h1600v900H0z"/>
+<ellipse cx="1190" cy="280" rx="445" ry="280" fill="url(#glow)"/>
+<path d="M-100 258Q240 145 500 219T1060 216T1710 112" stroke="#b5f7df" stroke-width="67" opacity=".16" filter="url(#soft)" fill="none"/>
+<path d="M-150 304Q180 210 460 254T960 238T1750 195" stroke="#e5d3fd" stroke-width="45" opacity=".26" filter="url(#soft)" fill="none"/>
+<circle cx="1215" cy="238" r="47" fill="#fffaeb" opacity=".85"/>
+<g opacity=".82"><use href="#star" x="100" y="96"/><use href="#star" x="221" y="159"/><use href="#star" x="640" y="84"/><use href="#star" x="890" y="143"/><use href="#star" x="1460" y="102"/><use href="#star" x="1348" y="192"/></g>
+<path d="M-60 567 130 366l147 145 205-235 218 277 167-186 190 181 175-210 185 209 183-165 130 173V900H-60Z" fill="#6d9fc0"/>
+<path d="m-60 583 190-217 147 145 205-235 218 277 167-186 190 181 175-210 185 209 183-165 130 173v34l-177-157-190 178-191-209-174 207-191-175-166 178-221-278-201 241-139-139-199 220Z" fill="url(#mount)" opacity=".96"/>
+<path d="m380 400 102-124 110 143-57-25-38 18-31-47-46 57Z" fill="#fffdf0"/><path d="m1024 385 34-47 111 122-61-28-38 18Z" fill="#fbffff"/><path d="m1241 438 55-67 97 107-54-22-35 15Z" fill="#fffefa"/>
+<path d="M-90 618q250-78 507 0t476-10 410-32 402 28V900H-90z" fill="#c1e2e8"/>
+<path d="M-70 682q200-87 432 2 230 78 480-2t440 23 380-32v250H-70z" fill="url(#snow)"/>
+<path d="M-70 786q288-81 564 5t514-12 551 9l110 127H-70z" fill="#edf9f4"/>
+<path d="M69 712q115-26 196 8m759 60q134-36 253-9" stroke="#fff" stroke-width="13" opacity=".45" fill="none" stroke-linecap="round"/>
+<g opacity=".83"><use href="#pine" transform="translate(82 664) scale(.9)"/><use href="#pine" transform="translate(200 689) scale(.62)"/><use href="#pine" transform="translate(300 692) scale(.52)"/><use href="#pine" transform="translate(1400 620) scale(.86)"/><use href="#pine" transform="translate(1530 683) scale(.58)"/></g>
+<g transform="translate(1215 526)">
+<path d="M-218 177Q-211-33-70-141 16-212 103-123q134 79 145 300l-15 106-466-4Z" fill="#3d789c" opacity=".35" transform="translate(11 20)"/>
+<path d="M-238 172Q-218-47-85-148q109-82 199 28 140 96 138 296l-23 102-462-7Z" fill="url(#cave)" stroke="#effaf1" stroke-width="16" stroke-linejoin="round"/>
+<path d="M-184 188Q-173 9-64-59q88-53 146 19 83 74 77 225v82h-342Z" fill="url(#door)" stroke="#9de6e1" stroke-width="13"/>
+<path d="M-191 195Q-186 34-98-43q40-43 96-30" fill="none" stroke="#ecffff" stroke-width="20" stroke-linecap="round" opacity=".72"/>
+<path d="M-249 92-225 53l-5-65 26 43 36-46-15 79 35 23-39 8-8 40-24-28Z" fill="#c7f4eb" stroke="#a9e8e6" stroke-width="4"/>
+<path d="m206 38 29-78 25 60 39 29-48 19-8 74-39-66Z" fill="#b6eeec" stroke="#eafffd" stroke-width="4"/>
+<path d="M-110 251q95-13 197 0" stroke="#e5fbfa" stroke-width="11" stroke-linecap="round" opacity=".65"/>
+<path d="M-28-144v-58m-33 72-37-35m107 38 37-48" stroke="#ecffed" stroke-width="10" stroke-linecap="round" opacity=".65"/>
+<g fill="#fae8ae"><ellipse cx="-169" cy="89" rx="9" ry="19"/><ellipse cx="151" cy="108" rx="9" ry="19"/></g>
+</g>
+<g opacity=".58" fill="#6aa3ba">
+<ellipse cx="560" cy="796" rx="18" ry="8"/><ellipse cx="602" cy="810" rx="15" ry="7"/><ellipse cx="647" cy="824" rx="13" ry="6"/><ellipse cx="681" cy="831" rx="11" ry="5"/>
+</g>
+<g fill="#fff" opacity=".75"><circle cx="101" cy="775" r="5"/><circle cx="425" cy="755" r="4"/><circle cx="970" cy="730" r="4"/><circle cx="1512" cy="762" r="5"/></g>
+<rect width="1600" height="900" fill="#fff" filter="url(#grain)" opacity=".19"/>
+</svg>
