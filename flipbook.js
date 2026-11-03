@@ -19,6 +19,8 @@
     ".flip-edge[disabled]{opacity:.3;cursor:not-allowed}",
     ".paper-overlay{position:absolute!important;z-index:6;margin:0!important;pointer-events:none!important;overflow:hidden;backface-visibility:hidden;transform-style:preserve-3d;will-change:transform;box-shadow:18px 8px 25px #38567575!important}",
     ".paper-overlay *{pointer-events:none!important}",
+    ".paper-preview{position:absolute!important;z-index:5;margin:0!important;pointer-events:none!important;overflow:hidden;backface-visibility:hidden;transform:translateZ(0)}",
+    ".paper-preview *{pointer-events:none!important}",
     ".flip-guide{text-align:center;color:#235b85;font-size:.9rem;margin:8px}",
     "@media(max-width:600px){.flipbook-stage{padding:7px;min-height:350px}.flipbook-stage .page{padding:18px;min-height:340px}.flip-edge{top:auto;bottom:6px;transform:none;padding:7px}#flipPrev{left:5px}#flipNext{right:5px}}",
     "@media(prefers-reduced-motion:reduce){.paper-overlay{transition:none!important}}"
@@ -33,7 +35,7 @@
   }
   const prev=createEdge("flipPrev","❮",-1,"Halaman sebelumnya");
   const next=createEdge("flipNext","❯",1,"Halaman seterusnya");
-  let busy=false,overlay=null,pointer=null;
+  let busy=false,overlay=null,preview=null,pointer=null;
   const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const duration=540;
   const getIndex=()=>state.getIndex();
@@ -43,31 +45,64 @@
     prev.disabled=!valid(-1);next.disabled=!valid(1);
     stage.setAttribute("aria-label","Halaman "+(getIndex()+1)+" daripada "+state.pageCount());
   }
+  function visualClone(className){
+    const copy=page.cloneNode(true);
+    copy.removeAttribute("id");
+    copy.querySelectorAll("[id]").forEach(node=>node.removeAttribute("id"));
+    // Avoid duplicate video decoders/iframes and animation flicker while cloning a page.
+    copy.querySelectorAll("iframe,video,audio").forEach(node=>node.remove());
+    copy.querySelectorAll("button,input,select,textarea,a").forEach(node=>{
+      node.setAttribute("tabindex","-1");
+    });
+    copy.classList.add(className);
+    copy.setAttribute("aria-hidden","true");
+    copy.style.left=page.offsetLeft+"px";
+    copy.style.top=page.offsetTop+"px";
+    copy.style.width=page.offsetWidth+"px";
+    copy.style.height=page.offsetHeight+"px";
+    copy.style.boxSizing="border-box";
+    return copy;
+  }
   function prepare(d){
     if(!valid(d))return false;
-    const old=page.cloneNode(true);
-    old.removeAttribute("id");
-    old.querySelectorAll("[id]").forEach(n=>n.removeAttribute("id"));
-    old.querySelectorAll("iframe,video,audio").forEach(n=>n.remove());
-    old.classList.add("paper-overlay");
-    old.setAttribute("aria-hidden","true");
-    old.style.left=page.offsetLeft+"px";old.style.top=page.offsetTop+"px";
-    old.style.width=page.offsetWidth+"px";old.style.height=page.offsetHeight+"px";
-    old.style.boxSizing="border-box";old.style.transformOrigin=d===1?"left center":"right center";
-    old.style.transform="rotateY(0deg)";
-    stage.append(old);overlay=old;
-    setIndex(getIndex()+d);window.renderPage();
-    page.classList.add("turning");
-    update();
-    return true;
+    const from=getIndex();
+    const outgoing=visualClone("paper-overlay");
+    // Build the incoming preview synchronously, then restore the REAL current
+    // page before the browser can paint. No actual page change until release.
+    try {
+      setIndex(from+d);
+      window.renderPage();
+      const incoming=visualClone("paper-preview");
+      setIndex(from);
+      window.renderPage();
+      preview=incoming;
+      outgoing.style.transformOrigin=d===1?"left center":"right center";
+      outgoing.style.transform="rotateY(0deg)";
+      stage.append(incoming);
+      stage.append(outgoing);
+      overlay=outgoing;
+      page.classList.add("turning");
+      update();
+      return true;
+    } catch(error) {
+      setIndex(from);
+      window.renderPage();
+      incomingCleanup();
+      throw error;
+    }
+  }
+  function incomingCleanup(){
+    if(preview){preview.remove();preview=null;}
+    if(overlay){overlay.remove();overlay=null;}
+    page.classList.remove("turning");
   }
   function rotation(d,p){
     if(overlay)overlay.style.transform="rotateY("+((d===1?-180:180)*p)+"deg)";
   }
   function clear(){
-    if(overlay)overlay.remove();
-    overlay=null;busy=false;pointer=null;
-    page.classList.remove("turning");update();
+    incomingCleanup();
+    busy=false;pointer=null;
+    update();
   }
   function animate(d,from,to,finished){
     if(!overlay||reduced){rotation(d,to);finished();return;}
@@ -85,9 +120,17 @@
   }
   function turn(d){
     if(busy||!valid(d)){update();return true;}
+    const from=getIndex();
     busy=true;
     if(!prepare(d)){clear();return true;}
-    animate(d,0,1,()=>{clear();window.stopVoice?.();window.playSound?.();});
+    animate(d,0,1,()=>{
+      // Commit only when the animation completes.
+      setIndex(from+d);
+      window.renderPage();
+      clear();
+      window.stopVoice?.();
+      window.playSound?.();
+    });
     return true;
   }
   // Webcam API: begin a page grab, follow the pupil's pinched hand and release.
@@ -115,14 +158,16 @@
     webcamGrab=null;
     const shouldTurn=Boolean(commit);
     animate(grabbed.direction,grabbed.progress,shouldTurn?1:0,()=>{
-      if(!shouldTurn){
-        setIndex(grabbed.old);
+      // Cancel: the real page was never changed. No rollback or flash.
+      if(shouldTurn){
+        setIndex(grabbed.old+grabbed.direction);
         window.renderPage();
-      }else{
+      }
+      clear();
+      if(shouldTurn){
         window.stopVoice?.();
         window.playSound?.();
       }
-      clear();
     });
     return true;
   }
@@ -166,9 +211,12 @@
     const fast=Math.abs(dx)>75&&performance.now()-p.t<460;
     const success=!cancel&&(p.progress>=.34||fast);
     animate(p.dir,p.progress,success?1:0,()=>{
-      if(!success){setIndex(p.old);window.renderPage();}
-      else{window.stopVoice?.();window.playSound?.();}
+      if(success){
+        setIndex(p.old+p.dir);
+        window.renderPage();
+      }
       clear();
+      if(success){window.stopVoice?.();window.playSound?.();}
     });
     try{stage.releasePointerCapture(e.pointerId);}catch(_){}
   }
@@ -177,6 +225,6 @@
   update();
   window.IceFlipbook={
     turn, syncButtons:update, beginGesture, moveGesture, finishGesture,
-    canTurn:valid, isBusy:()=>busy, version:"hand-pinch-drag-20261103"
+    canTurn:valid, isBusy:()=>busy, version:"no-flash-release-commit-20261103"
   };
 })();
