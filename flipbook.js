@@ -90,7 +90,43 @@
     animate(d,0,1,()=>{clear();window.stopVoice?.();window.playSound?.();});
     return true;
   }
-  function canStart(target){
+  // Webcam API: begin a page grab, follow the pupil's pinched hand and release.
+  // Reuses exactly the same 3D page layer as mouse dragging.
+  let webcamGrab=null;
+  function beginGesture(direction){
+    const d=Number(direction);
+    if(busy||webcamGrab||!valid(d))return false;
+    busy=true;
+    const old=getIndex();
+    if(!prepare(d)){clear();return false;}
+    webcamGrab={direction:d,old,progress:0};
+    return true;
+  }
+  function moveGesture(progress){
+    if(!webcamGrab||!overlay)return false;
+    const p=Math.max(0,Math.min(1,Number(progress)||0));
+    webcamGrab.progress=p;
+    rotation(webcamGrab.direction,p);
+    return true;
+  }
+  function finishGesture(commit){
+    if(!webcamGrab)return false;
+    const grabbed=webcamGrab;
+    webcamGrab=null;
+    const shouldTurn=Boolean(commit);
+    animate(grabbed.direction,grabbed.progress,shouldTurn?1:0,()=>{
+      if(!shouldTurn){
+        setIndex(grabbed.old);
+        window.renderPage();
+      }else{
+        window.stopVoice?.();
+        window.playSound?.();
+      }
+      clear();
+    });
+    return true;
+  }
+    function canStart(target){
     return !target.closest("button,a,input,textarea,select,video,iframe,audio,[contenteditable=true],.block-card");
   }
   stage.addEventListener("pointerdown",e=>{
@@ -139,5 +175,8 @@
   stage.addEventListener("pointerup",e=>end(e,false));
   stage.addEventListener("pointercancel",e=>end(e,true));
   update();
-  window.IceFlipbook={turn,syncButtons:update,version:"drag-20261103"};
+  window.IceFlipbook={
+    turn, syncButtons:update, beginGesture, moveGesture, finishGesture,
+    canTurn:valid, isBusy:()=>busy, version:"hand-pinch-drag-20261103"
+  };
 })();
