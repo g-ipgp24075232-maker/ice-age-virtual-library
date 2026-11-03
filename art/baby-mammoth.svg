@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 450" role="img" aria-label="Mamot kecil yang comel, lukisan 2D asal">
+<defs><linearGradient id="fur" x2=".7" y2="1"><stop stop-color="#e6b67b"/><stop offset=".55" stop-color="#b9784b"/><stop offset="1" stop-color="#8d563d"/></linearGradient><linearGradient id="face" x2="1" y2="1"><stop stop-color="#e4b582"/><stop offset="1" stop-color="#ba7b51"/></linearGradient><linearGradient id="tusk" x2="1" y2="1"><stop stop-color="#fffefa"/><stop offset="1" stop-color="#e5d7a5"/></linearGradient></defs>
+<ellipse cx="260" cy="412" rx="173" ry="20" fill="#4f829a" opacity=".24"/>
+<path d="M115 206Q83 166 57 184T82 269" stroke="#98613e" stroke-width="18" fill="none" stroke-linecap="round"/>
+<path d="M117 307q-27 38-10 79l29 21 30-8 15-87m146-3q-12 63 13 94l41-4q17-45-2-93" fill="#ae6c4c" stroke="#824c38" stroke-width="9" stroke-linejoin="round"/>
+<path d="M96 244Q87 116 216 109q112-25 187 70 38 66-6 153-26 52-133 56-164 7-168-144Z" fill="url(#fur)" stroke="#89563d" stroke-width="11" stroke-linejoin="round"/>
+<path d="M134 167q-48 53-12 128m32-133q-24 81 18 145m156-153q39 43 40 92" stroke="#ffe2ac" stroke-width="10" opacity=".45" fill="none" stroke-linecap="round"/>
+<path d="M243 155q-47-79 4-100 39-14 74 23 35 50-15 112Z" fill="#a96a53" stroke="#764533" stroke-width="11"/>
+<path d="M254 148q-18-44 10-60 24-10 48 15l-5 55Z" fill="#e6a6a1"/>
+<path d="M274 123q29-43 70-39 74 17 79 87 7 40-24 76l-34 26-105-34Z" fill="url(#face)" stroke="#87563d" stroke-width="10"/>
+<path d="M360 226q46 16 46 72 8 59-33 70-42 6-52-27" fill="none" stroke="#a96a49" stroke-width="61" stroke-linecap="round"/>
+<path d="M360 225q44 26 45 76 3 42-27 42" fill="none" stroke="#d69b70" stroke-width="30" stroke-linecap="round"/>
+<path d="M308 229q-23 66-68 56 44 60 86-16" fill="url(#tusk)" stroke="#b99c78" stroke-width="6" stroke-linejoin="round"/>
+<path d="M375 252q-2 74 44 76-14 47-57 24-18-30-13-71" fill="url(#tusk)" stroke="#b99c78" stroke-width="6" stroke-linejoin="round"/>
+<ellipse cx="340" cy="176" rx="19" ry="22" fill="#fff7e8"/><ellipse cx="345" cy="177" rx="10" ry="13" fill="#473b35"/><circle cx="349" cy="171" r="4" fill="white"/>
+<path d="M328 146q20-13 34-3" fill="none" stroke="#84513d" stroke-width="6" stroke-linecap="round"/>
+<ellipse cx="393" cy="212" rx="19" ry="11" fill="#e99e83" opacity=".65"/>
+<path d="M220 118q-29-57 10-60 9-23 29-10 21-32 41-8 24-4 30 35" fill="#754733" stroke="#754733" stroke-width="7" stroke-linejoin="round"/>
+<path d="M220 117q5-28 22-31m10 25q0-22 12-33m20 30q4-24 17-35" stroke="#c68e65" stroke-width="8" stroke-linecap="round"/>
+<path d="M142 326q41 28 77 23" fill="none" stroke="#f5cb97" stroke-width="8" stroke-linecap="round" opacity=".48"/>
+<path d="M156 406h-26m227-3h26" stroke="#754c3a" stroke-width="9" stroke-linecap="round"/>
+</svg>
