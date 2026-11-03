@@ -37,3 +37,18 @@ body{color:var(--ice-ink,#214c69)}
 #edit .whole-editor h2,#edit .whole-edit-card h3,.panel h1{color:var(--ice-ink,#214c69)}
 .whole-edit-tabs .whole-selected{background:var(--ice-user-accent,#3587b0)!important}
 .site-custom-heading{color:var(--ice-ink,#214c69)!important}
+
+/* Live per-animal sizing preview in the teacher editor */
+.whole-animal-preview{
+ display:flex;align-items:end;justify-content:center;gap:6px;
+ width:100%;min-height:160px;max-height:280px;overflow:auto;
+ background:linear-gradient(180deg,#e2f3fb,#f8fbef);
+ border:2px solid #a8ccd8;border-radius:16px;padding:12px;
+ margin:14px 0;scrollbar-width:thin;
+}
+.whole-animal-preview img{
+ display:block;height:auto!important;max-width:none!important;min-width:0;
+ flex:none;object-fit:contain;filter:drop-shadow(0 7px 5px #36688144);
+}
+.world-mammoth,.world-sabertooth{transition:width .18s ease-out;}
+@media(prefers-reduced-motion:reduce){.world-mammoth,.world-sabertooth{transition:none!important}}
