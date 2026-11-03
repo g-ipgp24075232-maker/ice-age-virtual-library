@@ -91,14 +91,20 @@ function normalize(raw){
  }
  return out;
 }
-let config=normalize(null),hasDraft=false;
+let config=normalize(null),hasDraft=false,lastSaveError="";
 try{
  const saved=localStorage.getItem(K);
  if(saved){config=normalize(JSON.parse(saved));hasDraft=true;}
 }catch(error){console.warn("Site settings:",error);}
 function save(){
- try{localStorage.setItem(K,JSON.stringify(config));hasDraft=true;return true;}
- catch(error){console.error("Site draft saving failed:",error);return false;}
+ try{localStorage.setItem(K,JSON.stringify(config));hasDraft=true;lastSaveError="";return true;}
+ catch(error){
+  lastSaveError=error&&error.name==="QuotaExceededError"?
+   "浏览器储存空间不足，请压缩图片或先导出 JSON。":
+   "无法将编辑内容保存到浏览器："+String(error&&error.message||error);
+  console.error("Site draft saving failed:",error);
+  return false;
+ }
 }
 function apply(){
  document.title=config.text.siteTitle;
@@ -115,20 +121,19 @@ function apply(){
   if(node&&asset(image))node.style.backgroundImage=
    "linear-gradient(180deg,#27557b71,#4f95a52e,#ffffff00),url('"+image+"')";
  }
- for(const [cls,key] of [["world-mammoth","mammoth"],["world-sabertooth","tiger"]]){
+ for(const [cls,animalId] of [["world-mammoth","mammoth"],["world-sabertooth","tiger"]]){
   document.querySelectorAll("."+cls).forEach(node=>{
-   const v=config.images[key];
+   const v=config.images[animalId];
    if(!asset(v))return;
    if(node.getAttribute("src")!==v)node.setAttribute("src",v);
    const welcome=!!node.closest("#welcome");
    // Set the actual width, NOT only max-width. The storybook CSS defines a
    // separate width with clamp(), so max-width alone could never enlarge it.
    const mobile=window.matchMedia("(max-width:650px)").matches;
-   const key=cls==="world-mammoth"?"mammoth":"tiger";
-   const preferred=welcome ? (key==="mammoth"?"mammothSize":"tigerSize") :
-     (key==="mammoth"?"mammothLibrarySize":"tigerLibrarySize");
-   const base=welcome?(key==="mammoth"?(mobile?145:415):(mobile?145:315)):
-     (key==="mammoth"?(mobile?120:190):(mobile?120:175));
+   const preferred=welcome ? (animalId==="mammoth"?"mammothSize":"tigerSize") :
+     (animalId==="mammoth"?"mammothLibrarySize":"tigerLibrarySize");
+   const base=welcome?(animalId==="mammoth"?(mobile?145:415):(mobile?145:315)):
+     (animalId==="mammoth"?(mobile?120:190):(mobile?120:175));
    const size=config.design.animalScale*config.design[preferred]/10000;
    node.style.setProperty("width",Math.round(base*size)+"px","important");
    node.style.setProperty("max-width","none","important");
@@ -137,11 +142,12 @@ function apply(){
    node.style.setProperty("object-fit","contain","important");
    // Relative left/right positioning stays independent of the animated
    // SVG's internal trunk/tail movements.
-   const x=config.design[key==="mammoth"?"mammothOffsetX":"tigerOffsetX"];
-   const y=config.design[key==="mammoth"?"mammothOffsetY":"tigerOffsetY"];
-   node.style.setProperty(key==="mammoth"?"left":"right",x+"px","important");
+   const x=config.design[animalId==="mammoth"?"mammothOffsetX":"tigerOffsetX"];
+   const y=config.design[animalId==="mammoth"?"mammothOffsetY":"tigerOffsetY"];
+   node.style.setProperty(animalId==="mammoth"?"left":"right",x+"px","important");
    node.style.setProperty("bottom",y+"px","important");
-   node.style.removeProperty(key==="mammoth"?"right":"left");
+   node.style.removeProperty(animalId==="mammoth"?"right":"left");
+   node.dataset.assetSource=animalId;
   });
  }
  const root=document.documentElement;
@@ -221,7 +227,7 @@ function update(path,value){
  const [scope,key]=path.split(".");
  if(!["text","images","design","audio"].includes(scope)||!(key in config[scope]))return false;
  const candidate=d(config);candidate[scope][key]=value;
- config=normalize(candidate);save();apply();return true;
+ config=normalize(candidate);const saved=save();apply();return saved;
 }
 function importConfig(raw,storeIt){
  config=normalize(raw);if(storeIt)save();apply();return d(config);
@@ -260,6 +266,7 @@ function applyAnimalSizing(){
 }
 window.IceSiteCore={initial:d(initial),groups,sections,config:()=>d(config),get:()=>config,
  update,apply,save,reset,importConfig,bundle,download,playAudio,syncAudio,
+ lastSaveError:()=>lastSaveError,
  validAsset:asset,validUrl:http,normalize,hasDraft:()=>hasDraft,
  version:"full-site-core-20261103"};
 // Prefer a teacher's current draft over a published version. Others see the
