@@ -57,6 +57,8 @@ jobs:
           test -s site/art/ice-cave-library.svg
           test -s site/art/baby-mammoth.svg
           test -s site/art/snow-owl.svg
+          test -s site/art/story-mammoth.svg
+          test -s site/art/story-sabertooth.svg
           node --check site/vendor/mediapipe/vision_bundle.mjs
           echo "Self-hosted MediaPipe assets and model validated."
           du -h site/vendor/mediapipe/vision_bundle.mjs site/vendor/mediapipe/models/hand_landmarker.task
