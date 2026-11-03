@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 570" role="img" aria-label="Harimau bertaring panjang jingga, lukisan animasi 2D">
+<defs>
+<linearGradient id="coat" x2=".7" y2="1"><stop stop-color="#f7b357"/><stop offset=".46" stop-color="#db7f35"/><stop offset="1" stop-color="#a34f27"/></linearGradient>
+<linearGradient id="face" x2="1" y2="1"><stop stop-color="#ffd08a"/><stop offset=".48" stop-color="#dc8640"/><stop offset="1" stop-color="#b9672f"/></linearGradient>
+<linearGradient id="cream" x2=".8" y2="1"><stop stop-color="#fff5d4"/><stop offset="1" stop-color="#e6c792"/></linearGradient>
+<style>
+.body{transform-box:fill-box;transform-origin:52% 89%;animation:catBreath 3.9s ease-in-out infinite}
+.tail{transform-box:fill-box;transform-origin:4% 45%;animation:tailWag 2.7s ease-in-out infinite}
+.head{transform-box:fill-box;transform-origin:85% 65%;animation:headTilt 5.6s ease-in-out infinite}
+.ear{transform-box:fill-box;transform-origin:50% 70%;animation:earTwitch 6s ease-in-out infinite}
+.eyelid{opacity:0;animation:blinkCat 5s step-end infinite}
+@keyframes catBreath{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.014)}}
+@keyframes tailWag{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(11deg)}}
+@keyframes headTilt{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(2deg)}}
+@keyframes blinkCat{0%,51%,56%,100%{opacity:0}52%,54%{opacity:1}}
+@keyframes earTwitch{0%,92%,100%{transform:rotate(0deg)}95%{transform:rotate(8deg)}}
+@media(prefers-reduced-motion:reduce){.body,.tail,.head,.ear,.eyelid{animation:none!important}}
+</style>
+</defs>
+<ellipse cx="396" cy="524" rx="292" ry="20" fill="#304d53" opacity=".18"/>
+<g stroke="#593322" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+<g class="tail"><path d="M644 274q86-28 84 54 0 42-42 44" fill="none" stroke="#9b562f" stroke-width="38"/><path d="M650 279q48-21 65 15m-25 60 30-13" stroke="#543324" stroke-width="16" fill="none"/><path d="M687 359q32 21 44-4l-17-21" fill="#7b4a31"/></g>
+<path d="M529 320q46 17 55 64l-24 101q-3 20 10 32h78q23-14 3-31l-12-68 16-75Z" fill="#bb6d32"/>
+<path d="M488 363q45 45 34 99l7 51q-14 22-46 15h-47q-24-6-5-26l-10-83Z" fill="#c4783b"/>
+<g class="body"><path d="M287 204q82-77 193-57 144 17 183 142 12 53-12 92l-33-13-15 37-26-16-25 38-29-28-35 22-24-31-42 11-18-35-44 7-29-41-23 11-35-43Z" fill="url(#coat)"/>
+<path d="M365 201q87-36 174 6 64 33 84 96" stroke="#f5c074" stroke-width="17" fill="none" opacity=".52"/>
+<path d="m392 160 5 61 31 15-11-79m51-5 11 76 29 25-13-87m65 24-10 69 34 24-13-76m46 57-36 35 36 14" stroke="#793d29" stroke-width="18" fill="none"/>
+<path d="m368 268-5 46 28 31m70-46-15 47 26 24m88-39-29 40m56-78-13 46" stroke="#914826" stroke-width="13" fill="none"/>
+<path d="M327 309q60 62 156 53l77-12-27 32-31 4-21 32-24-22-29 17-22-27-43 13-22-32-26 11Z" fill="url(#cream)" stroke="#a67b4c" stroke-width="5"/>
+<path d="M323 326q30 58 17 132l-6 43q-8 31 28 34h79q26-5 7-29l-11-48 10-58" fill="#c87536"/>
+<path d="M376 364q42 40 29 112l-3 29q-1 29 32 30h69q23-12 6-31l-13-35 4-53" fill="#d8873f"/>
+<path d="m360 502q9-4 17 22m19-22q10-3 14 21m17-19q13-2 15 21" fill="none" stroke="#f4c28c" stroke-width="10"/>
+<path d="M427 506q10-6 17 21m20-21q10-3 15 19" fill="none" stroke="#f8c88f" stroke-width="10"/>
+<path d="m352 381-18 25 25 25m77-37-18 23 27 20m130-32-19 27 30 14" fill="none" stroke="#89502b" stroke-width="15"/>
+</g>
+<g class="head">
+<path d="M280 200q56-18 78 29l29 50-20 33 18 16-35 10 8 22-42 1-12 27-36-22-26 14-20-28-37-5-12-51Z" fill="url(#cream)"/>
+<path d="m352 269-15 37 23-7-20 30-22-3-18 27m-62-12 27-18-17-20" stroke="#be8b52" stroke-width="7" fill="none"/>
+<g class="ear"><path d="M215 143q-19-57 15-81 46-11 69 61Z" fill="#ba6b39"/><path d="M228 124q-8-35 12-45 21 4 30 34Z" fill="#d89c8c" stroke-width="5"/></g>
+<path d="M337 126q7-62 48-62 41 17 31 65l-55 38Z" fill="#b36935"/><path d="M362 132q5-42 28-44 17 18 11 42Z" fill="#e3a08e" stroke-width="5"/>
+<path d="M150 186q19-64 97-70 88-16 125 66 32 66-7 119l-55 13-28 40-71-9-49-22-21-54-24-26Z" fill="url(#face)"/>
+<path d="m156 196 21-30m37-26 12 26m49-31-8 32m50-6-16 29m42 19-34 16" fill="none" stroke="#8d4e2e" stroke-width="13"/>
+<path d="M146 258q37-26 70 1 13 24 54 20l26 18-14 39-75 18-60-25Z" fill="url(#cream)"/>
+<path d="M263 281q35-22 79-9l-24 48-29 18-30-23Z" fill="url(#cream)"/>
+<path d="M145 279q-32-17-57 3l13 45 51 13 31-31Z" fill="#eecb92"/>
+<path d="M113 258q25-23 51-1 9 27-21 34-32-3-30-33Z" fill="#6f4035"/>
+<path d="M151 292q46 36 100 20 34-10 48-21" fill="none" stroke="#5a372a" stroke-width="8"/>
+<path d="M203 312q34 34 69 0l-5 24-47 15Z" fill="#b95d5c" stroke-width="5"/>
+<path d="M188 284q-15 26-10 93 0 25 16 28 24-33 32-109Z" fill="url(#cream)" stroke="#674b36" stroke-width="6"/>
+<path d="M270 287q-17 27-15 93 3 22 16 24 23-47 25-104Z" fill="url(#cream)" stroke="#674b36" stroke-width="6"/>
+<path d="M187 313q-7 36-3 58m84-54q-6 26-6 59" stroke="#fffdf4" stroke-width="8" fill="none" opacity=".75"/>
+<path d="M233 210q19-29 52-11 22 32 1 52-40 20-53-14Z" fill="#fff6e5"/>
+<ellipse cx="270" cy="224" rx="14" ry="20" fill="#56402c" stroke="none"/><circle cx="275" cy="217" r="6" fill="#fff" stroke="none"/>
+<path d="M218 189q42-26 71-3" fill="none" stroke="#743f29" stroke-width="10"/>
+<path class="eyelid" d="M233 213q34-28 63 1l-2 27-58-4Z" fill="#d58b49" stroke="none"/>
+<path d="M177 292q-20-5-39 2m44 14-35 10m35-1-30 23" stroke="#554438" stroke-width="4" fill="none"/>
+<path d="M303 293q23-12 49-10m-39 25 33 2" stroke="#645240" stroke-width="4" fill="none"/>
+<ellipse cx="307" cy="258" rx="15" ry="9" fill="#edac88" stroke="none" opacity=".59"/>
+</g>
+</g>
+</svg>
