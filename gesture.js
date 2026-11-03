@@ -463,14 +463,14 @@
       if (!pinch) {
         state.releaseFrames++;
         if(state.releaseFrames<2)return; // avoid a one-frame pinch jitter
-        const completed=grab.progress>=0.45;
+        const completed=grab.maxProgress>=0.30;
         flip.finishGesture(completed);
         state.grab=null;
         state.pinchLatched=true; // require open fingers before next grab
         state.gestureCooldown=now+1050;
         state.releaseFrames=0;
         state.start=null;
-        gestureHint(completed?"✅ Halaman diselak! Sedia untuk selak lagi.":"↩️ Belum cukup jauh, halaman kembali.",0);
+        gestureHint(completed?"✅ Halaman diselak! Sedia untuk selak lagi.":"↩️ Belum cukup jauh, halaman kembali. Cubit, tarik lebih jauh, lepaskan.",0);
         return;
       }
       state.releaseFrames=0;
@@ -478,6 +478,7 @@
       const traveled=grab.direction===1 ? grab.origin-x : x-grab.origin;
       const progress=Math.max(0,Math.min(1,traveled/0.34));
       grab.progress=grab.progress*0.18+progress*0.82;
+      grab.maxProgress=Math.max(grab.maxProgress,grab.progress);
       flip.moveGesture(grab.progress);
       gestureHint("📖 Halaman dipegang — terus seret, kemudian LEPASKAN jari!",grab.progress);
       return;
@@ -502,7 +503,7 @@
     if(!state.pinchAt)state.pinchAt=now;
     if(now-state.pinchAt<140)return;
     if(flip.beginGesture(direction)){
-      state.grab={origin:x,direction,progress:0};
+      state.grab={origin:x,direction,progress:0,maxProgress:0};
       state.releaseFrames=0;
       state.start=null;
       gestureHint(direction===1?"✊ Halaman dicengkam! Gerakkan tangan ke kiri.":"✊ Halaman dicengkam! Gerakkan tangan ke kanan.",0);
