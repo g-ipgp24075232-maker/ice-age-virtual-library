@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 570" role="img" aria-label="Mamot berbulu coklat dengan gading besar, ilustrasi kartun 2D bergerak">
+<defs>
+<linearGradient id="coat" x2=".55" y2="1"><stop stop-color="#aa714d"/><stop offset=".38" stop-color="#895433"/><stop offset="1" stop-color="#63391e"/></linearGradient>
+<linearGradient id="head" x2="1" y2="1"><stop stop-color="#c18a5e"/><stop offset=".62" stop-color="#955a38"/><stop offset="1" stop-color="#784527"/></linearGradient>
+<linearGradient id="ivory" x2=".7" y2="1"><stop stop-color="#fff8dd"/><stop offset=".52" stop-color="#f4dc9f"/><stop offset="1" stop-color="#cfb57f"/></linearGradient>
+<linearGradient id="ear" x2="0" y2="1"><stop stop-color="#9d6d57"/><stop offset="1" stop-color="#6a473c"/></linearGradient>
+<style>
+.body{transform-box:fill-box;transform-origin:50% 92%;animation:mammothBreath 4.6s ease-in-out infinite}
+.trunk{transform-box:fill-box;transform-origin:45% 4%;animation:trunkSwing 4.2s ease-in-out infinite}
+.tail{transform-box:fill-box;transform-origin:15% 12%;animation:tailWag 3.5s ease-in-out infinite}
+.ear{transform-box:fill-box;transform-origin:70% 45%;animation:earWiggle 6.4s ease-in-out infinite}
+.eyelid{transform-box:fill-box;transform-origin:50% 0%;animation:blinkMammoth 6.4s step-end infinite;opacity:0}
+@keyframes mammothBreath{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.012)}}
+@keyframes trunkSwing{0%,100%{transform:rotate(-2deg)}45%{transform:rotate(4deg)}72%{transform:rotate(-1deg)}}
+@keyframes tailWag{0%,100%{transform:rotate(0deg)}50%{transform:rotate(10deg)}}
+@keyframes earWiggle{0%,93%,100%{transform:rotate(0deg)}96%{transform:rotate(9deg)}}
+@keyframes blinkMammoth{0%,46%,50%,100%{opacity:0}47%,48%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.body,.trunk,.tail,.ear,.eyelid{animation:none!important}}
+</style>
+</defs>
+<ellipse cx="405" cy="528" rx="302" ry="20" fill="#213d45" opacity=".17"/>
+<g stroke="#40291f" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<g class="tail"><path d="M666 309Q711 328 711 395Q720 418 734 408" fill="none" stroke="#61361f" stroke-width="15"/><path d="M728 396q13 14 13 30-21 1-34-15" fill="#6a3d23" stroke-width="5"/></g>
+<path d="M533 359Q571 392 566 464L580 512Q595 536 573 538H493Q476 530 479 512L475 407Z" fill="#6b412b"/>
+<path d="M641 343Q667 411 651 489L665 517Q661 535 644 538H568Q551 531 561 506L566 394Z" fill="#754529"/>
+<path d="M577 515q17-12 25 11m11-15q16-10 23 13" fill="none" stroke="#b78d65" stroke-width="11"/>
+<g class="body">
+<path d="M273 183Q319 112 438 107q95-7 163 55 61 42 76 113l-2 55 17 44-31-9 5 31-34-16-3 31-27-16-16 35-19-18-27 26-19-24-37 20-18-29-36 20-25-27-44 26-12-29-45 8-22-38-27 5-17-56Z" fill="url(#coat)"/>
+<path d="m324 170 27-37-5 35 43-38-13 38 43-29-15 33 48-21-24 37 52-6-24 29 63-3-31 29 56 9-26 22 57 13-33 12 49 25-34 1 47 34-38-6" fill="none" stroke="#c89666" stroke-width="11" opacity=".48"/>
+<path d="m375 266-33 29 4-38-26 24m150 14-17 51-12-32-20 49-6-31m153-64-30 37 7-37-33 49m109 38-41 27m-168 34-27-23m197-14-33 11" fill="none" stroke="#452b20" stroke-width="8" opacity=".55"/>
+<path d="M331 288Q301 367 333 434l-17 73Q305 535 331 537h76q29-3 13-29l-17-69 21-64" fill="#845035"/>
+<path d="M434 356Q450 417 434 489l5 27q0 22 23 22h74q22-6 4-30l-14-42q11-46 20-75" fill="#6b402b"/>
+<path d="M324 511q15-7 25 12m18-11q16-7 21 12m13-13q13-4 18 14" stroke="#cfac84" stroke-width="10" fill="none"/>
+<path d="M451 511q15-5 18 14m19-14q14-4 19 13m21-13q12-5 17 10" stroke="#b69475" stroke-width="10" fill="none"/>
+<path d="m321 298-27-42 2 61-24-22 10 58m216 36-17 54 2-55-21 42" fill="none" stroke="#c58e5e" stroke-width="9" opacity=".58"/>
+</g>
+<path d="M184 158q-9-62 54-91 80-31 148 26l30 60-27 40-10 53-27 35-47 13-29 53-62-1-54-35-18-48-14-45Z" fill="url(#head)"/>
+<path d="M167 159q2-36 23-57l-6 40 30-61-4 51 33-76-5 62 36-67-11 59 38-49-12 55 37-26-14 38 36-13-18 31 26 1-32 35-52-25-56 37-63-35Z" fill="#5d371f"/>
+<path d="m191 153 28-57-5 54 41-69-10 62 38-62-14 58 37-42-17 47" fill="none" stroke="#a06b44" stroke-width="12"/>
+<g class="ear"><path d="M318 168q36-46 77-20 18 42-13 80l-51 18-30-21Z" fill="#885b4a"/><path d="M334 174q35-25 48 0 5 27-30 43l-21-8Z" fill="url(#ear)" stroke="#4a302b" stroke-width="6"/></g>
+<path d="M191 202Q157 223 166 275l31 46 49 17 55-23-10-56-35-45Z" fill="#ac7650" stroke="#67412a"/>
+<path d="m193 219q20-16 35-13m-34 42q18-11 40-6" stroke="#563621" stroke-width="6" fill="none"/>
+<g class="trunk"><path d="M173 238q-16 37-9 100 2 79 38 122 26 31 48 16 13-12 11-19-18-17-30-5-21-34-18-101l10-77-8-30Z" fill="url(#head)"/>
+<path d="m176 282 35 4m-39 27 36 5m-32 27 33 3m-28 25 31 3m-24 23 34 5m-19 21 35 5" stroke="#6b412b" stroke-width="5" fill="none"/>
+<path d="M230 459q23 3 30 11" stroke="#5c3527" stroke-width="5"/></g>
+<path d="M225 274Q174 352 83 335 10 319 29 212q5-25 29-50-17 62 0 104 19 46 79 40 37-3 70-62 21-14 26 8 2 12-8 22Z" fill="url(#ivory)" stroke="#655238" stroke-width="7"/>
+<path d="M256 272Q233 339 171 370 84 397 56 349q-17-30-3-70 3 35 27 53 45 30 91-12 30-28 52-72 17-20 31-11 13 15 2 35Z" fill="url(#ivory)" stroke="#69553d" stroke-width="7"/>
+<path d="M39 235Q29 276 56 300m4 48q37 38 80 4" fill="none" stroke="#fff9e0" stroke-width="9" opacity=".79"/>
+<path d="M263 213q-3-26 28-26 34 2 36 29-7 31-32 32-28-1-32-35" fill="#fdf8e9"/>
+<ellipse cx="301" cy="219" rx="14" ry="19" fill="#3f2c27" stroke="none"/><circle cx="306" cy="210" r="6" fill="#fff" stroke="none"/>
+<path d="M257 192q35-19 63-1" fill="none" stroke="#4c2e25" stroke-width="8"/>
+<path class="eyelid" d="M265 215q35-22 58 0l-6 24-48-3Z" fill="#a87551" stroke="none"/>
+<path d="M278 263q17 13 35-1" stroke="#5f3c2a" stroke-width="7" fill="none"/>
+<ellipse cx="253" cy="260" rx="17" ry="9" fill="#d19b79" stroke="none" opacity=".5"/>
+</g>
+</svg>
