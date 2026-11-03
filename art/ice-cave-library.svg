@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 850" role="img" aria-label="Ruang dalaman perpustakaan gua ais kartun">
+<defs>
+<linearGradient id="walls" x2=".2" y2="1"><stop stop-color="#367da4"/><stop offset=".35" stop-color="#80d1df"/><stop offset=".7" stop-color="#b9e8e8"/><stop offset="1" stop-color="#6289b3"/></linearGradient>
+<radialGradient id="inner"><stop stop-color="#f4fff3"/><stop offset=".53" stop-color="#c4eef2"/><stop offset="1" stop-color="#7baccd"/></radialGradient>
+<linearGradient id="floor" x2="0" y2="1"><stop stop-color="#b8edf0"/><stop offset=".48" stop-color="#dff9f5"/><stop offset="1" stop-color="#7eb4cd"/></linearGradient>
+<linearGradient id="crystal" x2="1" y2="1"><stop stop-color="#ffffff"/><stop offset=".37" stop-color="#c2f5e9"/><stop offset="1" stop-color="#57a3bf"/></linearGradient>
+<radialGradient id="lamp"><stop stop-color="#fff4c8" stop-opacity=".85"/><stop offset="1" stop-color="#fff7db" stop-opacity="0"/></radialGradient>
+<filter id="blur"><feGaussianBlur stdDeviation="15"/></filter>
+<g id="iceSpike"><path d="M0 0 28-106 56 0Z" fill="url(#crystal)" stroke="#f0fffb" stroke-width="3"/><path d="M28-106 28-3 56 0" fill="#65b2c3" opacity=".37"/></g>
+</defs>
+<rect width="1400" height="850" fill="#284f78"/>
+<path d="M-50 890V370Q-50 50 306-66L1067-66Q1458 37 1450 390v500Z" fill="url(#walls)" stroke="#b8f5ec" stroke-width="30"/>
+<path d="M96 780V352q28-216 281-299 330-107 639 13 277 112 279 299v416Z" fill="url(#inner)" stroke="#b2edf5" stroke-width="21"/>
+<path d="M-50 727Q300 657 641 719t809-17v148H-50Z" fill="url(#floor)"/>
+<path d="M127 288Q300 78 541 103m332-29q226 45 345 201" stroke="#f3fffe" stroke-width="22" stroke-linecap="round" fill="none" opacity=".43"/>
+<g opacity=".72"><use href="#iceSpike" transform="translate(80 445) rotate(170) scale(2.7)"/><use href="#iceSpike" transform="translate(200 240) rotate(180) scale(1.25)"/><use href="#iceSpike" transform="translate(1210 245) rotate(180) scale(1.8)"/><use href="#iceSpike" transform="translate(1320 455) rotate(170) scale(2.3)"/><use href="#iceSpike" transform="translate(300 125) rotate(178) scale(.75)"/><use href="#iceSpike" transform="translate(1070 150) rotate(180) scale(.95)"/></g>
+<g fill="#a2e7ea" opacity=".69"><path d="m30 680 52-134 41 134Z"/><path d="m115 680 37-106 46 106Z"/><path d="m1250 693 58-151 51 151Z"/><path d="m1333 698 29-82 40 82Z"/></g>
+<g transform="translate(176 300)"><ellipse rx="96" ry="105" fill="url(#lamp)"/><path d="M0-91v53" stroke="#6c90a1" stroke-width="9"/><path d="M-25-36Q0-52 25-36L32 15 0 37-32 15Z" fill="#ffe8a4" stroke="#c79d68" stroke-width="7"/><ellipse cy="0" rx="18" ry="24" fill="#fffad6"/></g>
+<g transform="translate(1220 282)"><ellipse rx="86" ry="96" fill="url(#lamp)"/><path d="M0-86v51" stroke="#6995ac" stroke-width="8"/><path d="M-23-35Q0-48 23-35L30 13 0 35-29 13Z" fill="#ffe3a6" stroke="#be9b70" stroke-width="7"/><ellipse ry="21" rx="17" fill="#fffad8"/></g>
+<path d="M145 640q270-19 552 13t559-14" fill="none" stroke="#f9ffff" stroke-width="16" opacity=".6" stroke-linecap="round"/>
+<g fill="#fff" opacity=".63"><circle cx="410" cy="230" r="7"/><circle cx="1040" cy="206" r="6"/><circle cx="986" cy="576" r="5"/><circle cx="335" cy="540" r="4"/></g>
+<g transform="translate(104 717)"><path d="M-67 28-32-91 2 20l30-138 39 145Z" fill="#69c7d2" stroke="#dffdf5" stroke-width="7"/><path d="M-32-91-14 26M31-118 50 24" stroke="#ffffff" stroke-width="5" opacity=".65"/></g>
+<g transform="translate(1300 725)"><path d="M-49 19-11-122 18 14 44-80 69 24Z" fill="#73c4d2" stroke="#e7fffc" stroke-width="7"/><path d="M-11-122 2 14" stroke="#fff" stroke-width="6" opacity=".54"/></g>
+<path d="M72 753Q290 729 550 772t783-12" fill="none" stroke="#f3ffff" stroke-width="13" opacity=".55"/>
+</svg>
