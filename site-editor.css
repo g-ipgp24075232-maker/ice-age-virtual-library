@@ -1,0 +1,33 @@
+/* Whole-site teacher editor: controls for every page, character, theme and custom media */
+.whole-editor{margin:18px 0 28px;border:4px solid #9ccdc6;border-radius:23px;background:linear-gradient(140deg,#f5fff9,#ddf2ed);padding:19px;box-shadow:0 9px 20px #376f8044;color:#214d68}
+.whole-editor h2{margin:0 0 8px;color:#28617a}
+.whole-editor p{line-height:1.6}
+.whole-edit-actions,.whole-edit-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.whole-edit-tabs button{font-size:.86rem!important;padding:9px 12px!important}
+.whole-edit-tabs .whole-selected{background:#176688!important;color:white!important;border-color:#21536d!important}
+.whole-edit-body{background:#fffdf5;border:2px solid #b8d7d1;border-radius:15px;padding:14px}
+.whole-edit-card{padding:14px;border:2px solid #b5d6d2;border-radius:15px;margin:15px 0;background:#edf9f5}
+.whole-edit-card h3{color:#225b7b;margin:3px 0 13px}
+.whole-edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.whole-edit-field{min-width:0;display:grid;gap:5px;font-weight:600;font-size:.9rem;margin:8px 0}
+.whole-edit-field input,.whole-edit-field select,.whole-edit-field textarea{
+ width:100%;min-height:39px;background:#fffefa;border:2px solid #b2cbcb;border-radius:10px;padding:9px;font:inherit;color:#214e69
+}
+.whole-edit-field input[type=color]{height:50px;padding:2px}
+.whole-edit-field textarea{min-height:100px;resize:vertical}
+.whole-edit-preview{display:block;width:100%;max-height:150px;object-fit:contain;border-radius:10px;background:#dbeeed;margin:11px 0}
+.whole-edit-note{padding:12px;border-left:5px solid #d2b171;background:#fff5da;border-radius:8px;color:#615534;font-size:.9rem}
+.whole-edit-message{font-weight:700;color:#216e5e;min-height:25px}
+.whole-edit-item{background:#fffcf1;border:2px dashed #a6c6cb;border-radius:12px;padding:14px;margin:12px 0}
+.site-custom-content{position:relative;z-index:4;display:grid;gap:11px;width:min(95%,900px);margin:14px auto}
+.site-custom-content .site-custom-heading{font-size:clamp(1.2rem,2.5vw,1.65rem);color:#285979;text-align:center;text-shadow:0 2px #fffbef}
+.site-custom-content .site-custom-text{white-space:pre-wrap;background:#fff8e9eb;border:2px solid #d4c9a7;border-radius:14px;padding:14px;color:#355974;text-align:left}
+.site-custom-content img{width:auto;display:block;max-width:100%;max-height:420px;margin:auto;border-radius:14px}
+.site-custom-content iframe,.site-custom-content video{width:min(100%,700px);aspect-ratio:16/9;border:0;border-radius:12px;margin:auto}
+.site-custom-content .site-custom-link{display:inline-block;margin:auto;padding:10px 14px;border-radius:16px;background:#ffe9b9;color:#285a7d;border:2px solid #b79868;text-decoration:none;font-weight:700}
+body.site-hide-animals .world-mammoth,body.site-hide-animals .world-sabertooth{display:none!important}
+body.site-stop-animals .world-mammoth,body.site-stop-animals .world-sabertooth{animation:none!important}
+body.whole-quick-mode [data-site-key]{outline:3px dashed #e8a83a!important;outline-offset:4px;cursor:text!important}
+.whole-inline-dialog{position:fixed;z-index:5000;top:13%;right:16px;width:min(430px,calc(100vw - 30px));padding:20px;border:3px solid #99d4d3;border-radius:20px;background:#fffef6;box-shadow:0 20px 50px #23567588;color:#235878}
+.whole-inline-dialog textarea{width:100%;min-height:140px;padding:11px;font:inherit;border:2px solid #bdd4d4;border-radius:11px}
+@media(max-width:670px){.whole-edit-grid{grid-template-columns:1fr}.whole-editor{padding:10px}.whole-edit-body{padding:7px}}
