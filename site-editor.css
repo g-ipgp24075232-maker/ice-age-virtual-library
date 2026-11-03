@@ -31,3 +31,9 @@ body.whole-quick-mode [data-site-key]{outline:3px dashed #e8a83a!important;outli
 .whole-inline-dialog{position:fixed;z-index:5000;top:13%;right:16px;width:min(430px,calc(100vw - 30px));padding:20px;border:3px solid #99d4d3;border-radius:20px;background:#fffef6;box-shadow:0 20px 50px #23567588;color:#235878}
 .whole-inline-dialog textarea{width:100%;min-height:140px;padding:11px;font:inherit;border:2px solid #bdd4d4;border-radius:11px}
 @media(max-width:670px){.whole-edit-grid{grid-template-columns:1fr}.whole-editor{padding:10px}.whole-edit-body{padding:7px}}
+
+/* Expose the editable accent and ink selections across the interface. */
+body{color:var(--ice-ink,#214c69)}
+#edit .whole-editor h2,#edit .whole-edit-card h3,.panel h1{color:var(--ice-ink,#214c69)}
+.whole-edit-tabs .whole-selected{background:var(--ice-user-accent,#3587b0)!important}
+.site-custom-heading{color:var(--ice-ink,#214c69)!important}
