@@ -1,0 +1,378 @@
+/* Original hand-painted storybook-inspired theme for Perpustakaan Maya Zaman Air Batu.
+   Uses illustrated SVG assets stored within this repository, not copyrighted film artwork. */
+:root{
+  --ice-ink:#214c69;
+  --ice-navy:#244d75;
+  --ice-paper:#fff6df;
+  --ice-glow:#fbe6a6;
+  --ice-outline:#5f8ba5;
+  --ice-mint:#b3e9da;
+}
+html{scroll-behavior:smooth}
+body{
+ background:linear-gradient(180deg,#7fbbd4 0%,#ccefe8 54%,#e7f7ee 100%);
+ font-family:"Trebuchet MS",Verdana,Arial,sans-serif;
+ color:var(--ice-ink);
+}
+body::before{display:none!important}
+body::after{
+ content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+ background:radial-gradient(circle at 84% 12%,#fff6ccaa,transparent 26%),
+ repeating-linear-gradient(125deg,#ffffff0c 0 1px,transparent 1px 19px);
+}
+button:not(.book):not(.flip-edge), .topnav button {
+ border-radius:18px 20px 16px 22px!important;
+ border:2px solid #5795ac!important;
+ box-shadow:0 5px 0 #23567955,0 8px 18px #357ba547!important;
+ transition:transform .2s ease,box-shadow .2s ease,filter .2s ease!important;
+}
+button:not(.book):not(.flip-edge):hover{
+ transform:translateY(-2px);
+ box-shadow:0 7px 0 #23567955,0 12px 22px #357ba557!important;
+}
+button:not(.book):not(.flip-edge):active{transform:translateY(2px);box-shadow:0 2px 0 #23567955!important}
+button.secondary{background:#fffaf0!important;color:#21597c!important;border-color:#91bbc1!important}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{
+ outline:4px solid #f6d673!important;outline-offset:3px
+}
+.shell{position:relative;max-width:1320px;padding:14px 24px 28px;z-index:5}
+.top{
+ position:relative;z-index:20;max-width:1300px;margin:0 auto 14px;
+ padding:13px 18px;border:3px solid #b5e7e6;
+ border-radius:25px 30px 19px 28px;
+ background:linear-gradient(100deg,#fefbf0ed,#e6f6f5f5);
+ box-shadow:0 8px 0 #4e95a87d,0 17px 35px #1f68835a;
+ backdrop-filter:blur(8px);
+}
+.top strong{color:#285a79;text-shadow:1px 2px #fff;font-size:clamp(1.05rem,2vw,1.38rem)}
+.topnav{gap:8px}
+.topnav button{padding:9px 12px;font-size:.9rem}
+.top #releaseMark{max-width:100%;vertical-align:middle}
+.hero h1{color:#fff7e2;line-height:1.15;letter-spacing:.7px;
+ text-shadow:0 4px 0 #417ca3,3px 6px 0 #417ca3,-2px 5px 0 #417ca3,0 10px 20px #0a425f88}
+.hero p{color:#1f506d;line-height:1.55;text-shadow:1px 2px #f9fffc9c}
+#welcome{
+ min-height:min(810px,calc(100svh - 120px));
+ padding:6vh 6% 13%;
+ position:relative;isolation:isolate;
+ overflow:hidden;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ background:
+ linear-gradient(180deg,#234e7390 0%,#4789a244 48%,#f7f6e500 83%),
+ url("art/ice-age-landscape.svg") center bottom / cover no-repeat;
+ border:10px solid #eafdf5;
+ border-radius:46% 46% 35px 35px / 15% 15% 35px 35px;
+ box-shadow:inset 0 12px 27px #d8fcfce0,0 17px 0 #77b8c8,0 30px 55px #356c9099;
+ margin:15px auto 25px;
+}
+#welcome::before{
+ content:"";position:absolute;inset:-20px;z-index:-1;pointer-events:none;
+ background:radial-gradient(ellipse at 50% 28%,#163e6f44,transparent 60%);
+}
+#welcome h1{
+ max-width:810px;font-size:clamp(2.2rem,5.25vw,4.55rem);
+ margin:14px 0 12px;transform:rotate(-.8deg);
+ animation:storyTitle 4.5s ease-in-out infinite;
+}
+#welcome p{
+ color:#fff9e9;text-shadow:0 2px 5px #23466a,1px 1px 4px #23466a;
+ font-size:clamp(1.02rem,2vw,1.32rem);max-width:675px;margin:8px 0
+}
+#welcome button{
+ font-size:clamp(1.04rem,2vw,1.3rem);padding:17px 28px;margin-top:22px;
+ background:linear-gradient(#ffe3a8,#f3a864)!important;color:#554323!important;
+ border:4px solid #fff8dc!important;
+ box-shadow:0 8px 0 #b96d50,0 15px 28px #17435c66!important;
+ animation:invitation 3.7s ease-in-out infinite;
+}
+#welcome button:hover{filter:brightness(1.06)}
+#library .hero h1{color:#fff7e0;font-size:clamp(2.4rem,4.5vw,4rem)}
+#library .hero p{color:#eefdf3;text-shadow:0 2px #2f729c}
+#library{
+ position:relative;isolation:isolate;min-height:750px;
+ padding:18px 22px 33px;
+ background:
+ linear-gradient(180deg,#4b83a75c 0%,#336d9a3b 45%,#dcf9f244 100%),
+ url("art/ice-cave-library.svg") center top / cover no-repeat;
+ border:12px solid #bceff1;
+ border-radius:42% 42% 30px 30px / 12% 12% 30px 30px;
+ box-shadow:inset 0 20px 24px #ffffff80,0 20px 0 #6da7bb,0 30px 60px #28618b88;
+ overflow:hidden;
+ margin:18px 0 32px;
+}
+#library .cave{
+ background:radial-gradient(ellipse at 50% 12%,#f8f9e52e,#c0eff10f 60%,#245c8c25 100%);
+ border:0;
+ border-radius:35px;
+ box-shadow:none;
+ min-height:495px;
+ padding:38px 12px 45px;
+}
+#library .cave::before,#library .cave::after{
+ content:"✧";position:absolute;top:11%;font-size:44px;color:#e7ffdb;
+ text-shadow:0 0 20px #ffffda,0 0 40px #fffaef;
+ animation:twinkle 3.6s ease-in-out infinite;pointer-events:none
+}
+#library .cave::before{left:6%}
+#library .cave::after{right:7%;animation-delay:1.5s}
+#library .cave>p{color:#f5fff6!important;text-shadow:0 2px 6px #1c5d8c,1px 2px #1c5d8c}
+#library .shelves{
+ position:relative;z-index:2;
+ background:linear-gradient(180deg,#f2faf725,#cceef12a);
+ border:4px solid #fafff15c;
+ box-shadow:0 7px 16px #1c6d8c45;
+ border-radius:28px;
+ padding:34px 17px 10px;
+ gap:18px;
+ max-width:1030px;
+}
+#library .shelf{
+ width:99%;height:26px;
+ background:linear-gradient(#d7a970,#ae8051 42%,#6c4d3c);
+ border:3px solid #f9da9b;
+ box-shadow:0 12px 0 #584333,0 20px 17px #1a4b7073;
+ margin-top:8px;
+}
+#library .book{
+ width:clamp(112px,15vw,143px);height:clamp(170px,22vw,215px);
+ position:relative;overflow:hidden;
+ background:
+ linear-gradient(100deg,#fff9e96b 0 6%,#312e5c32 7% 14%,#f6fcff18 16% 79%,#fff8c347 82%),
+ var(--book);
+ border:6px solid #fdf1cc;
+ outline:2px solid #6e7189;
+ outline-offset:-10px;
+ border-radius:9px 25px 15px 8px;
+ color:#fffaf0;
+ text-shadow:0 2px 4px #17344b;
+ box-shadow:8px 8px 0 #3452718a,inset 9px 0 15px #1b314e5c,0 14px 18px #244f7870;
+ animation:bookBreathe 5s ease-in-out infinite;
+ animation-delay:calc(var(--book-index,0)*-.5s);
+ transition:transform .25s ease,filter .25s ease;
+}
+#library .book::before{
+ content:"❄ ✦ ❄";
+ color:#fff2bd;font-size:1.48rem;
+ margin-bottom:13px;text-shadow:0 0 12px #fff6c4;
+}
+#library .book::after{
+ content:"";position:absolute;inset:8px;
+ border:1.5px solid #f8eab986;
+ border-radius:4px 15px 9px 6px;
+ pointer-events:none;
+}
+#library .book span{display:block;line-height:1.3;font-size:.92rem}
+#library .book small{font-size:.69rem;color:#fff1c4}
+#library .book:hover,#library .book:focus-visible{
+ transform:translateY(-23px) rotate(-3deg) scale(1.045)!important;
+ filter:brightness(1.12);animation-play-state:paused;
+}
+#library .book.gesture-focus{
+ animation-play-state:paused;
+ transform:translateY(-19px) scale(1.06)!important;
+ outline:5px solid #ffdd75;outline-offset:3px;
+}
+.panel{
+ position:relative;
+ background:
+ radial-gradient(circle at 85% 3%,#fffef2 0%,#fff7eacc 33%,transparent 62%),
+ linear-gradient(140deg,#fdf8e9f7,#e3f3eef7);
+ border:5px solid #f5e7be;
+ outline:3px solid #74b9c4;
+ border-radius:30px 34px 25px 33px;
+ box-shadow:0 14px 0 #5d9da857,0 21px 42px #386a8d7a;
+ padding:28px;
+}
+.panel::before{
+ content:"❄ ✧ ❄";
+ position:absolute;right:26px;top:14px;opacity:.26;font-size:1.65rem;color:#5489ad;
+ pointer-events:none
+}
+#reader{max-width:1080px;background:linear-gradient(140deg,#fffdf1,#dff3f5)}
+#reader .reader-head strong{font-size:clamp(1.08rem,2.5vw,1.4rem);color:#345c7a}
+#reader .page{
+ border:8px double #bba67b;
+ background:linear-gradient(95deg,#e8d6ac 0%,#fff8e4 9%,#fffdf0 95%,#ead9b5 100%);
+ color:#443d37;
+ box-shadow:inset 0 0 28px #b49c6947;
+}
+#reader .page h2{font-family:Georgia,"Trebuchet MS",serif;color:#336481}
+#reader .page p{color:#4c493c;line-height:1.8}
+#reader .flipbook-stage{border:7px solid #bfe6ec;border-radius:20px;box-shadow:0 13px 24px #46758b55}
+#resources h1,#edit h1{font-size:clamp(1.7rem,3vw,2.4rem);color:#3a7390;text-shadow:1px 2px #ffffff}
+#resources .reference-card{
+ background:
+ linear-gradient(145deg,#fff8e8,#f4e8d2);
+ border:3px solid #e3c998;
+ border-left:9px solid #6cb9bb;
+ border-radius:8px 22px 12px 18px;
+ box-shadow:4px 6px 0 #b49d733d,0 13px 22px #5999a239;
+}
+#resources .reference-card h3{color:#3c6981}
+#resources .reference-pill{background:#dcefe8;border:1px solid #a3cfbf}
+#resources .reference-apa{background:#fffdf5}
+#resources .reference-form{
+ background:linear-gradient(160deg,#f5fdf3,#e2f3ee);
+ border:3px solid #a8d7d1;
+}
+#resources input,#resources select,#edit input,#edit select,#edit textarea{
+ border:2px solid #9bc1c2;border-radius:12px;background:#fffefa;
+}
+#edit .editor-grid{gap:22px}
+#edit .editor-list{
+ background:#e3f3f0;border:2px solid #b6d7cb;border-radius:16px;
+ padding:15px;align-content:start;
+}
+#edit .block-card{background:#fffaf0;border:2px dashed #d5bb89;border-radius:14px}
+footer{
+ margin:34px 0 4px;color:#2e6684;font-weight:bold;
+ text-shadow:0 1px #fff;
+}
+/* Animated original cartoon mascots and ice ornaments */
+.world-illustration{pointer-events:none;user-select:none;position:absolute;z-index:2}
+.world-mammoth{
+ width:clamp(130px,25vw,300px);left:3%;bottom:3%;
+ filter:drop-shadow(0 13px 5px #25577533);
+ transform-origin:50% 85%;animation:mammothSway 4.5s ease-in-out infinite
+}
+.world-owl{
+ width:clamp(75px,12vw,145px);right:8%;top:12%;
+ animation:owlBreathe 4.8s ease-in-out infinite;
+ filter:drop-shadow(0 8px 6px #205f7766)
+}
+#library .world-mammoth{width:clamp(115px,17vw,190px);bottom:1%;left:1%;z-index:3}
+#library .world-owl{top:30%;right:2%;width:clamp(68px,9vw,116px);z-index:3}
+.world-crystal{
+ position:absolute;pointer-events:none;z-index:2;
+ width:clamp(35px,7vw,88px);height:clamp(60px,11vw,120px);
+ background:linear-gradient(140deg,#ffffffc9 0 15%,#a5eef5ba 26%,#63c1d0a3 75%,#f5ffffcc);
+ clip-path:polygon(43% 0%,77% 30%,100% 70%,58% 100%,0% 77%,15% 32%);
+ filter:drop-shadow(0 0 11px #e7ffff);
+ animation:crystalGleam 4s ease-in-out infinite;
+}
+.world-crystal-left{bottom:5%;left:22%}
+.world-crystal-right{right:2%;bottom:9%;animation-delay:1.9s}
+.world-floating-star{
+ position:absolute;pointer-events:none;z-index:4;color:#fff5c8;
+ text-shadow:0 0 18px #fff9d5;font-size:clamp(18px,3vw,34px);
+ animation:twinkle 3s ease-in-out infinite;
+}
+.world-star-one{top:13%;left:21%}
+.world-star-two{top:24%;right:23%;animation-delay:1.3s}
+.world-star-three{bottom:28%;right:13%;animation-delay:2.1s}
+.world-aurora{position:absolute;z-index:1;pointer-events:none;top:0;left:-30%;width:160%;height:55%;
+ background:linear-gradient(115deg,transparent 18%,#bdffe62f 37%,#c2cdff46 49%,#c7ffe135 62%,transparent 82%);
+ filter:blur(22px);transform:rotate(-10deg);
+ animation:auroraDrift 13s ease-in-out infinite alternate}
+.world-story-caption{
+ position:absolute;top:22%;right:2%;background:#fffaf2e7;
+ border:3px solid #e4d1a1;border-radius:17px 19px 16px 20px;
+ max-width:210px;padding:10px 15px;color:#2b6381;font-weight:bold;font-size:.95rem;
+ box-shadow:0 7px 0 #4b86995c;transform:rotate(3deg);z-index:4;
+}
+.world-story-caption:after{
+ content:"";position:absolute;left:12px;bottom:-16px;
+ border:8px solid transparent;border-top-color:#fffaf2
+}
+/* Multi-layer storm particles: the visual layer never catches clicks. */
+#iceWorldWeather{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:11;contain:strict}
+#iceWorldWeather .snow-layer{
+ position:absolute;inset:-20%;pointer-events:none;
+ background-repeat:repeat;
+ animation:snowDrift var(--fall,20s) linear infinite;
+ opacity:var(--opacity,.6);will-change:transform
+}
+#iceWorldWeather .snow-far{
+ background-image:radial-gradient(#fffefd 1.35px,transparent 1.8px);
+ background-size:91px 113px;--fall:38s;--opacity:.39;
+}
+#iceWorldWeather .snow-mid{
+ background-image:radial-gradient(#fffefa 2px,transparent 2.7px),
+ radial-gradient(#e5faff 1.7px,transparent 2.8px);
+ background-size:133px 170px,217px 145px;
+ background-position:5px 30px,72px 16px;--fall:23s;--opacity:.59;
+}
+#iceWorldWeather .snow-near{
+ background-image:radial-gradient(#ffffff 3px,transparent 4px),
+ radial-gradient(#eefcff 2.9px,transparent 4.2px);
+ background-size:240px 225px,173px 210px;
+ background-position:40px 58px,14px 5px;--fall:14s;--opacity:.7;
+}
+#iceWorldWeather .snow-haze{
+ position:absolute;inset:-25%;opacity:0;
+ background:repeating-linear-gradient(110deg,transparent 0 90px,#f3feff20 110px,#ffffff5c 118px,#f5feff21 138px,transparent 180px);
+ filter:blur(10px);transform:translateX(-18%);
+ will-change:transform,opacity;
+}
+#iceWorldWeather.storm-burst .snow-haze{animation:blizzardGust 5.5s ease-in-out 1}
+#iceWorldWeather.storm-burst .snow-layer{animation-duration:calc(var(--fall,20s) * .49)}
+#iceWorldWeather .snow-soft-light{
+ position:absolute;inset:0;background:radial-gradient(circle at 80% 13%,#fff5c921,transparent 35%);
+ opacity:.8
+}
+body.weather-off #iceWorldWeather{display:none}
+body.weather-gentle #iceWorldWeather .snow-near{opacity:.24}
+body.weather-gentle #iceWorldWeather .snow-mid{opacity:.3}
+body.weather-gentle #iceWorldWeather .snow-far{opacity:.24}
+.weather-controls{
+ position:fixed;right:15px;bottom:15px;z-index:28;display:flex;gap:6px;align-items:center;
+ background:#e9faffee;border:2px solid #a4d9e6;border-radius:16px;
+ box-shadow:0 7px 18px #2e6c8b49;padding:5px 7px;
+ backdrop-filter:blur(7px);
+}
+.weather-controls button{
+ font-size:.8rem;white-space:nowrap;padding:7px 10px!important
+}
+.weather-controls .weather-status{font-size:.76rem;color:#2e6480;font-weight:bold;padding:0 5px}
+@keyframes snowDrift{0%{transform:translate3d(-1%,-10%,0)}100%{transform:translate3d(11%,23%,0)}}
+@keyframes blizzardGust{
+ 0%{opacity:0;transform:translate3d(-34%,0,0)}
+ 14%{opacity:.45}42%{opacity:.7}
+ 85%{opacity:.22}100%{opacity:0;transform:translate3d(43%,-3%,0)}
+}
+@keyframes storyTitle{0%,100%{transform:translateY(0) rotate(-.8deg)}50%{transform:translateY(-6px) rotate(.5deg)}}
+@keyframes invitation{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes mammothSway{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(2deg) translateY(-7px)}}
+@keyframes owlBreathe{0%,100%{transform:rotate(-2deg) translateY(0)}45%{transform:rotate(3deg) translateY(-8px)}}
+@keyframes bookBreathe{0%,100%{filter:brightness(1)}50%{filter:brightness(1.075)}}
+@keyframes twinkle{0%,100%{opacity:.38;transform:scale(.85)}45%{opacity:1;transform:scale(1.17)}}
+@keyframes crystalGleam{0%,100%{opacity:.75;filter:brightness(.95) drop-shadow(0 0 6px #b7ffff)}50%{opacity:1;filter:brightness(1.15) drop-shadow(0 0 18px #b7ffff)}}
+@keyframes auroraDrift{0%{transform:translateX(-7%) rotate(-12deg);opacity:.38}100%{transform:translateX(9%) rotate(-4deg);opacity:.75}}
+@media(max-width:900px){
+ .world-story-caption{top:15%;right:3%;max-width:165px;font-size:.8rem}
+ #welcome{min-height:660px;background-position:57% bottom}
+ #library{min-height:660px;background-position:55% top}
+ #library .world-owl{right:0%;top:22%}
+ .weather-controls{right:8px;bottom:8px}
+}
+@media(max-width:650px){
+ .shell{padding:10px 12px}
+ .top{padding:10px 12px}
+ .topnav button{font-size:.77rem;padding:7px 9px}
+ #welcome{min-height:610px;padding:100px 10px 135px;border-width:7px;border-radius:42% 42% 24px 24px/10% 10% 24px 24px}
+ #welcome h1{font-size:clamp(2.1rem,7vw,3rem)}
+ #welcome p{font-size:.95rem}
+ #welcome .world-mammoth{width:145px;left:-11px;bottom:1%}
+ #welcome .world-owl{width:80px;top:6%;right:4%}
+ #welcome .world-story-caption{top:5%;right:27%;max-width:155px;font-size:.73rem;padding:7px}
+ #library{border-width:7px;padding:10px 3px;min-height:730px}
+ #library .hero h1{font-size:2.4rem}
+ #library .cave{padding:22px 5px 40px}
+ #library .shelves{gap:12px;padding:25px 4px}
+ #library .book{width:105px;height:160px;border-width:4px;padding:10px 5px}
+ #library .book span{font-size:.73rem}
+ #library .book small{font-size:.59rem}
+ #library .world-mammoth{bottom:0;left:-13px;width:110px}
+ #library .world-owl{width:72px;right:0;top:15%}
+ .panel{padding:18px 14px}
+ .weather-controls{max-width:calc(100vw - 16px)}
+ .weather-controls button{font-size:.7rem;padding:6px 8px!important}
+ .weather-controls .weather-status{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ #iceWorldWeather .snow-layer,#iceWorldWeather .snow-haze,.world-illustration,
+ #library .book,#welcome h1,#welcome button,.world-crystal,.world-floating-star,
+ .world-aurora{animation:none!important;transition:none!important}
+ #iceWorldWeather .snow-near,#iceWorldWeather .snow-mid{opacity:.16!important}
+ #iceWorldWeather .snow-haze{display:none!important}
+}
