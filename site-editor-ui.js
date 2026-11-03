@@ -162,16 +162,31 @@ function mediaFields(){
   const area=card(body,title);
   const img=make("img");img.src=d.images[key];img.alt=title;img.className="whole-edit-preview";area.append(img);
   const src=input(area,"图片 URL（HTTPS / art/...）",d.images[key],"text",v=>{
-   if(core.validAsset(v)){core.update("images."+key,v);img.src=v;}
+   if(core.validAsset(v)){
+    const saved=core.update("images."+key,v);
+    img.src=v;
+    message(saved?"✅ 新图片已经应用到首页和书架；点击首页预览查看。":
+      "⚠️ 图片已应用到当前页面，但未能保存在浏览器。"+(core.lastSaveError?.()||"请导出备份。"));
+   }
   });
   const upload=make("label",null,"whole-edit-field");upload.append(make("span","📁 上传新图片"));
   const file=make("input");file.type="file";file.accept="image/png,image/jpeg,image/webp";
   file.addEventListener("change",async()=>{
    if(!file.files?.length)return;
-   try{const data=await imageToDataURL(file.files[0]);core.update("images."+key,data);render();message("✅ 图片已更新到本地草稿。请导出 JSON 发布到 GitHub。");}
+   try{
+    const data=await imageToDataURL(file.files[0]);
+    const saved=core.update("images."+key,data);
+    render();
+    message(saved?"✅ 已替换"+title+"，首页和书架图片已同步更新。点击「看首页」立即预览。":
+      "⚠️ 已替换"+title+"，但无法保存在浏览器。"+(core.lastSaveError?.()||"请导出 JSON。"));
+   }
    catch(e){message("⚠️ "+e.message);}
   });
   upload.append(file);area.append(upload);
+  area.append(button("👁 看首页替换结果",()=>{
+   if(typeof window.show==="function")window.show("welcome");
+   window.scrollTo({top:0,behavior:"smooth"});
+  },true));
   area.append(button("✂ 自动裁剪现有图片空白边缘",async()=>{
    const current=state().images[key];
    if(!current.startsWith("data:image/")){
@@ -180,8 +195,8 @@ function mediaFields(){
    }
    try{
     const processed=await imageSourceToDataURL(current);
-    core.update("images."+key,processed);
-    render();message("✅ 已处理图片边缘。调整大小滑块可进一步放大。");
+    const saved=core.update("images."+key,processed);
+    render();message(saved?"✅ 图片边缘已处理，首页已同步。":"⚠️ 图片已裁剪，但保存失败："+(core.lastSaveError?.()||"请导出 JSON。"));
    }catch(error){message("⚠️ "+error.message);}
   },true));
   area.append(button("↺ 恢复默认图片",()=>{core.update("images."+key,core.initial.images[key]);render();},true));
