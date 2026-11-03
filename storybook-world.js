@@ -20,14 +20,14 @@
     const aurora=el("div","world-aurora");aurora.setAttribute("aria-hidden","true");
     parent.prepend(aurora);
     const mammoth=el("img","world-illustration world-mammoth");
-    mammoth.src="art/baby-mammoth.svg";mammoth.alt="";mammoth.loading="eager";
+    mammoth.src="art/story-mammoth.svg";mammoth.alt="";mammoth.loading="eager";
     mammoth.decoding="async";
     mammoth.setAttribute("aria-hidden","true");
-    const owl=el("img","world-illustration world-owl");
-    owl.src="art/snow-owl.svg";owl.alt="";owl.loading="eager";
-    owl.decoding="async";
-    owl.setAttribute("aria-hidden","true");
-    parent.append(mammoth,owl);
+    const tiger=el("img","world-illustration world-sabertooth");
+    tiger.src="art/story-sabertooth.svg";tiger.alt="";tiger.loading="eager";
+    tiger.decoding="async";
+    tiger.setAttribute("aria-hidden","true");
+    parent.append(mammoth,tiger);
     ["world-crystal-left","world-crystal-right"].forEach(name=>{
       const c=el("div","world-crystal "+name);c.setAttribute("aria-hidden","true");parent.append(c);
     });
