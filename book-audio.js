@@ -10,10 +10,18 @@ const status=document.createElement("p");
 status.id="mp3StudentStatus";status.setAttribute("role","status");status.style.textAlign="center";
 status.textContent="🔊 Dengar Cerita: MP3 guru atau suara automatik";
 get("reader")?.querySelector(".controls")?.insertAdjacentElement("afterend",status);
+const ttsBtn=document.createElement("button");
+ttsBtn.type="button";ttsBtn.className="secondary";
+ttsBtn.textContent="🔊 Suara automatik (jika MP3 tiada)";
+ttsBtn.setAttribute("aria-label","Guna suara automatik Bahasa Melayu");
+ttsBtn.addEventListener("click",()=>{stop();window.readTTS?.();});
+status.insertAdjacentElement("afterend",ttsBtn);
+ttsBtn.style.cssText="display:block;margin:8px auto 18px;font-size:.88rem";
 function note(x){status.textContent=x;}
 function stop(){
 if(player){player.pause();player.removeAttribute("src");player.load();}
 window.IceSoundscape?.duckForNarration(false);
+ sync();
 }
 function play(src){
 if(!valid(src))return false;
