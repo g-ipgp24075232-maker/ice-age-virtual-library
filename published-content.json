@@ -1,4 +1,4 @@
-{{
+{
   "version": 1,
   "site": {
     "text": {
@@ -363,10 +363,4 @@
     }
   ],
   "publishedAt": "2026-11-03T03:50:02.534Z"
-}
-  "version": 1,
-  "site": null,
-  "books": null,
-  "sources": null,
-  "note": "Published site content. Export from teacher dashboard and replace this JSON file to publish changes to every visitor."
 }
