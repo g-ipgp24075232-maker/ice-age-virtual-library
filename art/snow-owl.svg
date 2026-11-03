@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 300" role="img" aria-label="Burung hantu salji kartun dalam gaya buku cerita">
+<defs><linearGradient id="w" x2=".7" y2="1"><stop stop-color="#fffef2"/><stop offset="1" stop-color="#bddde1"/></linearGradient><linearGradient id="wing" x2="1" y2="1"><stop stop-color="#d7e8dc"/><stop offset="1" stop-color="#8aabc5"/></linearGradient></defs>
+<ellipse cx="174" cy="277" rx="84" ry="14" fill="#51778b" opacity=".16"/>
+<path d="M100 74 111 39 146 58q31-15 55-1l40-18 5 45" fill="#f8fff2" stroke="#728ea2" stroke-width="9" stroke-linejoin="round"/>
+<ellipse cx="170" cy="155" rx="93" ry="117" fill="url(#w)" stroke="#849ca4" stroke-width="9"/>
+<path d="M97 126q-73 13-54 92l61 15m143-106q74 14 51 93l-52 14" fill="url(#wing)" stroke="#839aa4" stroke-width="8"/>
+<ellipse cx="139" cy="134" rx="34" ry="36" fill="#fefdf4"/><ellipse cx="206" cy="134" rx="34" ry="36" fill="#fefdf4"/>
+<circle cx="144" cy="133" r="15" fill="#705d4a"/><circle cx="202" cy="133" r="15" fill="#705d4a"/><circle cx="148" cy="127" r="5" fill="#fff"/><circle cx="206" cy="127" r="5" fill="#fff"/>
+<path d="m170 159-15 16 18 18 16-19Z" fill="#e6ba69" stroke="#ba9552" stroke-width="3"/>
+<g stroke="#8caaa9" stroke-width="7" stroke-linecap="round" opacity=".6"><path d="m114 197 31 10m80-10-28 11m-64 30 20 6m65-6-19 8"/></g>
+<path d="M131 260v17l22 7 17-5m42-20v17l-23 8-15-6" fill="none" stroke="#bc996a" stroke-width="9" stroke-linecap="round"/>
+</svg>
