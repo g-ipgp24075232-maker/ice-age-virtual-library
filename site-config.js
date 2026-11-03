@@ -27,7 +27,9 @@ const initial={
  images:{welcome:"art/ice-age-landscape.svg",library:"art/ice-cave-library.svg",
   mammoth:"art/story-mammoth.svg",tiger:"art/story-sabertooth.svg"},
  design:{ink:"#214c69",paper:"#fff7e8",accent:"#3587b0",font:"Trebuchet MS",
-  width:1320,snow:"snow",animals:true,animalMotion:true,animalScale:100,gestureSensitivity:17},
+  width:1320,snow:"snow",animals:true,animalMotion:true,animalScale:100,
+  mammothSize:100,tigerSize:100,mammothLibrarySize:100,tigerLibrarySize:100,
+  mammothOffsetX:0,mammothOffsetY:0,tigerOffsetX:0,tigerOffsetY:0,gestureSensitivity:17},
  audio:{music:"",volume:35},
  blocks:{welcome:[],library:[],reader:[],resources:[],edit:[]}
 };
@@ -66,7 +68,16 @@ function normalize(raw){
  if(["snow","gentle","off"].includes(raw.design?.snow))out.design.snow=raw.design.snow;
  if(typeof raw.design?.animals==="boolean")out.design.animals=raw.design.animals;
  if(typeof raw.design?.animalMotion==="boolean")out.design.animalMotion=raw.design.animalMotion;
- if(Number.isFinite(Number(raw.design?.animalScale)))out.design.animalScale=max(raw.design.animalScale,50,160);
+ if(Number.isFinite(Number(raw.design?.animalScale)))out.design.animalScale=max(raw.design.animalScale,30,500);
+ for(const key of ["mammothSize","tigerSize","mammothLibrarySize","tigerLibrarySize"]){
+  if(Number.isFinite(Number(raw.design?.[key])))out.design[key]=max(raw.design[key],30,500);
+ }
+ for(const key of ["mammothOffsetX","tigerOffsetX"]){
+  if(Number.isFinite(Number(raw.design?.[key])))out.design[key]=max(raw.design[key],-250,350);
+ }
+ for(const key of ["mammothOffsetY","tigerOffsetY"]){
+  if(Number.isFinite(Number(raw.design?.[key])))out.design[key]=max(raw.design[key],-150,250);
+ }
  if(Number.isFinite(Number(raw.design?.gestureSensitivity)))out.design.gestureSensitivity=max(raw.design.gestureSensitivity,10,26);
  if(typeof raw.audio?.music==="string"&&(!raw.audio.music||http(raw.audio.music)))out.audio.music=raw.audio.music;
  if(Number.isFinite(Number(raw.audio?.volume)))out.audio.volume=max(raw.audio.volume,0,100);
@@ -110,8 +121,27 @@ function apply(){
    if(!asset(v))return;
    if(node.getAttribute("src")!==v)node.setAttribute("src",v);
    const welcome=!!node.closest("#welcome");
-   const base=cls==="world-mammoth"?(welcome?415:190):(welcome?315:175);
-   node.style.maxWidth=Math.round(base*config.design.animalScale/100)+"px";
+   // Set the actual width, NOT only max-width. The storybook CSS defines a
+   // separate width with clamp(), so max-width alone could never enlarge it.
+   const mobile=window.matchMedia("(max-width:650px)").matches;
+   const key=cls==="world-mammoth"?"mammoth":"tiger";
+   const preferred=welcome ? (key==="mammoth"?"mammothSize":"tigerSize") :
+     (key==="mammoth"?"mammothLibrarySize":"tigerLibrarySize");
+   const base=welcome?(key==="mammoth"?(mobile?145:415):(mobile?145:315)):
+     (key==="mammoth"?(mobile?120:190):(mobile?120:175));
+   const size=config.design.animalScale*config.design[preferred]/10000;
+   node.style.setProperty("width",Math.round(base*size)+"px","important");
+   node.style.setProperty("max-width","none","important");
+   node.style.setProperty("height","auto","important");
+   node.style.setProperty("min-width","0","important");
+   node.style.setProperty("object-fit","contain","important");
+   // Relative left/right positioning stays independent of the animated
+   // SVG's internal trunk/tail movements.
+   const x=config.design[key==="mammoth"?"mammothOffsetX":"tigerOffsetX"];
+   const y=config.design[key==="mammoth"?"mammothOffsetY":"tigerOffsetY"];
+   node.style.setProperty(key==="mammoth"?"left":"right",x+"px","important");
+   node.style.setProperty("bottom",y+"px","important");
+   node.style.removeProperty(key==="mammoth"?"right":"left");
   });
  }
  const root=document.documentElement;
@@ -125,7 +155,8 @@ function apply(){
  document.body.classList.toggle("site-hide-animals",!config.design.animals);
  document.body.classList.toggle("site-stop-animals",!config.design.animalMotion);
  document.body.style.setProperty("--site-accent",config.design.accent);
- document.getElementById("gestureSensitivity")?.setAttribute("value",str(config.design.gestureSensitivity));
+ const sensitivity=document.getElementById("gestureSensitivity");
+ if(sensitivity)sensitivity.value=str(config.design.gestureSensitivity);
  if(window.IceStoryWorld?.changeWeather)window.IceStoryWorld.changeWeather(config.design.snow);
  renderBlocks();
  updateAudio();
@@ -207,6 +238,25 @@ function download(){
 }
 function reset(){
  config=normalize(null);save();apply();return d(config);
+}
+window.addEventListener("resize",()=>{
+ // Responsive base dimensions change between laptop and mobile; keep saved scale.
+ applyAnimalSizing();
+});
+function applyAnimalSizing(){
+ const mobile=window.matchMedia("(max-width:650px)").matches;
+ for(const [cls,key] of [["world-mammoth","mammoth"],["world-sabertooth","tiger"]]){
+  document.querySelectorAll("."+cls).forEach(node=>{
+   const welcome=!!node.closest("#welcome");
+   const preferred=welcome?(key==="mammoth"?"mammothSize":"tigerSize"):
+     (key==="mammoth"?"mammothLibrarySize":"tigerLibrarySize");
+   const base=welcome?(key==="mammoth"?(mobile?145:415):(mobile?145:315)):
+     (key==="mammoth"?(mobile?120:190):(mobile?120:175));
+   const size=config.design.animalScale*config.design[preferred]/10000;
+   node.style.setProperty("width",Math.round(base*size)+"px","important");
+   node.style.setProperty("max-width","none","important");
+  });
+ }
 }
 window.IceSiteCore={initial:d(initial),groups,sections,config:()=>d(config),get:()=>config,
  update,apply,save,reset,importConfig,bundle,download,playAudio,syncAudio,
