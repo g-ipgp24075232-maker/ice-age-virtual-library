@@ -18,7 +18,7 @@ const bar=make("div",null,"whole-edit-toolbar");
 bar.append(make("h2","🎨 Edit Seluruh Laman · 全站编辑"));
 bar.append(make("p","首页、所有页面、图片、动画、颜色、音乐及自定义内容，都可以在这里编辑。修改后可实时预览。"));
 const actions=make("div",null,"whole-edit-actions");
-actions.append(button("👁 Pratonton 首页",()=>{if(typeof window.home==="function")window.home();window.scrollTo({top:0,behavior:"smooth"});},true));
+actions.append(button("👁 Pratonton 首页",()=>{if(typeof window.show==="function")window.show("welcome");window.scrollTo({top:0,behavior:"smooth"});},true));
 actions.append(button("✍️ Klik Teks untuk Edit",()=>setQuick(!quick),true));
 actions.append(button("💾 Simpan Semua Draf",()=>{window.saveDraft?.();core.save();message("✅ 设计、书本和资料已保存在这台设备。");}));
 bar.append(actions);panel.append(bar);
