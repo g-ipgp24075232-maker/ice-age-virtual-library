@@ -376,3 +376,56 @@ body.weather-gentle #iceWorldWeather .snow-far{opacity:.24}
  #iceWorldWeather .snow-near,#iceWorldWeather .snow-mid{opacity:.16!important}
  #iceWorldWeather .snow-haze{display:none!important}
 }
+
+
+/* A coherent storybook animal pair: hand-drawn black outlines, shaggy brown
+   woolly mammoth and striped, long-fanged saber-toothed tiger. Each character's
+   SVG contains small independent animations (ears/trunk, tail/head/blinking). */
+#welcome .world-mammoth{
+  width:clamp(195px,32vw,415px);
+  left:clamp(-45px,0vw,15px);
+  bottom:0%;
+  z-index:3;
+  animation:mammothSway 5.8s ease-in-out infinite;
+  transform-origin:50% 90%;
+}
+.world-sabertooth{
+  width:clamp(148px,24vw,315px);
+  right:3%;
+  bottom:1%;
+  filter:drop-shadow(0 9px 5px #31596740);
+  animation:tigerStep 4.8s ease-in-out infinite;
+  transform-origin:65% 88%;
+  z-index:3;
+}
+#library .world-mammoth{
+  width:clamp(110px,17vw,190px);
+  bottom:0;
+  left:0;
+}
+#library .world-sabertooth{
+  width:clamp(110px,16vw,175px);
+  bottom:0;
+  right:0;
+  z-index:3;
+}
+#welcome .world-story-caption{
+  top:12%;
+  right:4%;
+  z-index:4;
+}
+@keyframes tigerStep{
+  0%,100%{transform:translate3d(0,0,0) rotate(-1deg)}
+  35%{transform:translate3d(-8px,-5px,0) rotate(1deg)}
+  70%{transform:translate3d(2px,-2px,0) rotate(0deg)}
+}
+@media(max-width:650px){
+  #welcome .world-mammoth{width:clamp(145px,38vw,205px);left:-18px;bottom:1%}
+  #welcome .world-sabertooth{width:clamp(129px,35vw,180px);right:-12px;bottom:1%}
+  #library .world-sabertooth{width:clamp(100px,27vw,145px);right:-15px;bottom:0}
+  #library .world-mammoth{width:clamp(100px,27vw,150px);left:-15px;bottom:0}
+  #welcome .world-story-caption{top:5%;right:26%;max-width:145px}
+}
+@media(prefers-reduced-motion:reduce){
+ .world-sabertooth{animation:none!important}
+}
