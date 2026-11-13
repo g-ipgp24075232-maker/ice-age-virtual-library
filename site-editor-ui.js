@@ -148,7 +148,26 @@ async function imageSourceToDataURL(source){
  return data;
 }
 async function imageToDataURL(file){
- if(!/^image\/(png|jpeg|webp)$/.test(file.type))throw Error("请上传 JPG、PNG 或 WebP。");
+ const gif=/\.gif$/i.test(file.name||"")||file.type==="image/gif";
+ if(gif){
+  // Animated GIFs must be read unchanged. Drawing them onto a canvas freezes frame 1.
+  if(file.size>1500000)throw Error("GIF 超过 1.5 MB。为避免浏览器草稿和 JSON 超出限制，请先压缩 GIF，或者上传到 GitHub 的 art/ 文件夹后填入图片 URL。");
+  const buffer=await file.arrayBuffer();
+  const bytes=new Uint8Array(buffer);
+  const signature=String.fromCharCode(...bytes.slice(0,6));
+  if(signature!=="GIF89a"&&signature!=="GIF87a")throw Error("这个文件不是有效的 GIF 图片。");
+  return await new Promise((resolve,reject)=>{
+   const reader=new FileReader();
+   reader.onload=()=>{
+    const content=String(reader.result||"");
+    if(!/^data:image\/gif;base64,[A-Za-z0-9+/=]+$/i.test(content))reject(Error("GIF 文件无法转换成可保存的数据。"));
+    else resolve(content);
+   };
+   reader.onerror=()=>reject(Error("GIF 文件读取失败。"));
+   reader.readAsDataURL(file);
+  });
+ }
+ if(!/^image\/(png|jpeg|webp)$/.test(file.type))throw Error("支持 PNG、JPG、WebP 或 GIF 格式。");
  if(file.size>9e6)throw Error("图片超过 9MB，请先压缩。");
  const url=URL.createObjectURL(file);
  try{return await imageSourceToDataURL(url);}
@@ -156,7 +175,7 @@ async function imageToDataURL(file){
 }
 function mediaFields(){
  const d=state();
- hint(body,"替换欢迎页背景、冰洞背景、猛犸象和剑齿虎图片。可以直接粘贴 HTTPS 图片链接或上传 PNG/JPG/WebP。原 SVG 动画中的耳朵/鼻子等细节需在 GitHub 修改 SVG 文件。");
+ hint(body,"替换欢迎页背景、冰洞背景、猛犸象和剑齿虎图片。可以直接粘贴 HTTPS 图片链接或上传 PNG/JPG/WebP/GIF。GIF 会保留动画，但大小需在 1.5MB 以内；大文件请上传到 GitHub art/ 文件夹并填写 URL。原 SVG 动画中的耳朵/鼻子等细节需在 GitHub 修改 SVG 文件。");
  const media=[["welcome","🏠 首页背景"],["library","📚 冰洞书架背景"],["mammoth","🦣 猛犸象"],["tiger","🐅 剑齿虎"]];
  for(const [key,title] of media){
   const area=card(body,title);
@@ -170,14 +189,14 @@ function mediaFields(){
    }
   });
   const upload=make("label",null,"whole-edit-field");upload.append(make("span","📁 上传新图片"));
-  const file=make("input");file.type="file";file.accept="image/png,image/jpeg,image/webp";
+  const file=make("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif,.gif";
   file.addEventListener("change",async()=>{
    if(!file.files?.length)return;
    try{
     const data=await imageToDataURL(file.files[0]);
     const saved=core.update("images."+key,data);
     render();
-    message(saved?"✅ 已替换"+title+"，首页和书架图片已同步更新。点击「看首页」立即预览。":
+    message(saved?"✅ 已替换"+title+(data.startsWith("data:image/gif;")?"（动态 GIF 已保留动画）":"")+"，首页和书架图片已同步更新。点击「看首页」立即预览。":
       "⚠️ 已替换"+title+"，但无法保存在浏览器。"+(core.lastSaveError?.()||"请导出 JSON。"));
    }
    catch(e){message("⚠️ "+e.message);}
@@ -193,6 +212,7 @@ function mediaFields(){
     message("⚠️ 只有已上传到编辑器的图片可以直接裁剪。若使用 URL，请先下载再上传。");
     return;
    }
+   if(current.startsWith("data:image/gif;")){message("ℹ️ GIF 不能自动裁剪，因为裁剪会使动画变成静态图片。请使用保留动画的 GIF 编辑工具裁剪，再重新上传。");return;}
    try{
     const processed=await imageSourceToDataURL(current);
     const saved=core.update("images."+key,processed);
@@ -308,7 +328,7 @@ function blockFields(){
     input(card,"图片说明／视频标题",entry.alt,"text",v=>modifyBlock(section,i,"alt",v));
    }
    if(entry.type==="image"){
-    const picker=make("input");picker.type="file";picker.accept="image/png,image/jpeg,image/webp";
+    const picker=make("input");picker.type="file";picker.accept="image/png,image/jpeg,image/webp,image/gif,.gif";
     picker.addEventListener("change",async()=>{
      if(!picker.files?.length)return;
      try{const value=await imageToDataURL(picker.files[0]);modifyBlock(section,i,"url",value,false);}
