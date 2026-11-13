@@ -44,17 +44,42 @@ function renderPageEditor(){let b=books[editIndex],p=b.pages[editPageIndex];if(!
 function renderBlockList(){let blocks=books[editIndex].pages[editPageIndex].blocks;let root=$('blockList');root.innerHTML='';blocks.forEach((block,i)=>{let c=document.createElement('div');c.className='block-card';let head=document.createElement('strong');head.textContent='Blok '+(i+1)+' — '+block.type;c.append(head);let addField=(key,label)=>{let l=document.createElement('label');l.className='field';l.textContent=label;let inp=document.createElement(key==='text'?'textarea':'input');inp.value=block[key]??'';inp.oninput=()=>{block[key]=inp.value;scheduleBookDraftSave()};l.append(inp);c.append(l)};if(block.type==='text')addField('text','Teks Bahasa Melayu');if(block.type==='image'){addField('url','URL gambar');addField('caption','Kapsyen');addField('alt','Teks alternatif')}if(block.type==='video')addField('url','YouTube atau MP4 URL');if(block.type==='quiz'){addField('question','Soalan');block.options.forEach((v,j)=>{let l=document.createElement('label');l.className='field';l.textContent='Pilihan '+(j+1);let inp=document.createElement('input');inp.value=v;inp.oninput=()=>{block.options[j]=inp.value;scheduleBookDraftSave()};l.append(inp);c.append(l)});let l=document.createElement('label');l.className='field';l.textContent='Jawapan betul (1–4)';let inp=document.createElement('input');inp.type='number';inp.min='1';inp.max='4';inp.value=Number(block.answer)+1;inp.oninput=()=>{block.answer=Math.max(0,Math.min(3,Number(inp.value)-1));scheduleBookDraftSave()};l.append(inp);c.append(l)}let act=document.createElement('div');act.className='actions';[['↑',()=>{if(i>0)[blocks[i-1],blocks[i]]=[blocks[i],blocks[i-1]]}],['↓',()=>{if(i<blocks.length-1)[blocks[i+1],blocks[i]]=[blocks[i],blocks[i+1]]}],['Padam',()=>blocks.splice(i,1)]].forEach(([label,cb])=>{let bt=document.createElement('button');bt.className='secondary';bt.textContent=label;bt.onclick=()=>{cb();saveBookDraftNow();renderBlockList()};act.append(bt)});c.append(act);root.append(c)})}
 function addBook(){books.push({id:unique(),title:'BUKU BAHARU',color:'#3274b4',pages:[{title:'Halaman 1',blocks:[{type:'text',text:''}]}]});editIndex=books.length-1;editPageIndex=0;saveBookDraftNow();editor()}
 let bookDraftTimer=null;
-function saveBookDraftNow(){
+let bookDraftSaveSequence=Promise.resolve(true);
+function saveBooksDraft(){
  if(bookDraftTimer){clearTimeout(bookDraftTimer);bookDraftTimer=null;}
+ const snapshot={books:deep(books),sources:deep(sourceData),modified:Date.now()};
+ const info=$("editStatus");
+ if(info)info.textContent="💾 Sedang menyimpan draf buku dan rakaman MP3...";
+ let localSaved=false;
  try{
-  localStorage.setItem("iceLibraryDraft",JSON.stringify({books,sources:sourceData}));
-  const info=$("editStatus");if(info)info.textContent="✅ Suntingan buku dan halaman disimpan pada peranti ini. Eksport JSON dan Commit untuk semua murid.";
-  return true;
+  localStorage.setItem("iceLibraryDraft",JSON.stringify({books:snapshot.books,sources:snapshot.sources}));
+  localStorage.setItem("iceLibraryDraftTimestamp",String(snapshot.modified));
+  localSaved=true;
  }catch(error){
-  const info=$("editStatus");if(info)info.textContent="⚠️ Tidak dapat simpan buku: storan penuh. Eksport JSON untuk salinan sandaran.";
-  console.warn("Book draft cannot save",error);return false;
+  // MP3 and GIF uploads often exceed localStorage's tiny quota.
+  // IndexedDB is the durable primary backup for all book drafts.
+  console.info("Large book draft will be saved to IndexedDB",error.name);
  }
+ const indexedSave=bookDraftSaveSequence.catch(()=>true).then(async()=>{
+  if(!window.IceBookDrafts?.write)return false;
+  await window.IceBookDrafts.write(snapshot);
+  return true;
+ });
+ bookDraftSaveSequence=indexedSave;
+ return indexedSave.then(ok=>{
+  const success=ok||localSaved;
+  if(info)info.textContent=success?
+   "✅ Buku dan MP3 disimpan sebagai draf pada peranti ini. Eksport JSON dan Commit untuk semua murid.":
+   "⚠️ Gagal menyimpan draf. Gunakan pautan audio GitHub atau Eksport JSON untuk sandaran.";
+  return success;
+ }).catch(error=>{
+  if(info)info.textContent=localSaved?
+   "✅ Draf disimpan di pelayar, tetapi storan MP3 tambahan tidak tersedia.":
+   "❌ Simpan gagal: "+error.message+". Cuba fail MP3 lebih kecil atau pautan GitHub audio/.";
+  return localSaved;
+ });
 }
+function saveBookDraftNow(){void saveBooksDraft();return true;}
 function scheduleBookDraftSave(){if(bookDraftTimer)clearTimeout(bookDraftTimer);bookDraftTimer=setTimeout(saveBookDraftNow,250);}
 function saveDraft(){const ok=saveBookDraftNow();const siteOk=window.IceSiteCore?.save()!==false;if(!ok||!siteOk)$("editStatus").textContent="⚠️ Sesetengah draf gagal disimpan. Sila Eksport JSON untuk sandaran.";}
 function exportJSON(){if(window.IceSiteCore){window.IceSiteCore.download();return}let blob=new Blob([JSON.stringify({books,sources:sourceData},null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ice-library-content.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
@@ -64,5 +89,5 @@ document.addEventListener('keydown',e=>{if($('reader').classList.contains('hidde
 window.BookPageState={getIndex:()=>pageIndex,getBookIndex:()=>bookIndex,setIndex:n=>{pageIndex=n},pageCount:()=>books[bookIndex]?.pages?.length||0};
 window.IceEditingBook={getIndex:()=>editIndex,getPageIndex:()=>editPageIndex};
 window.IceReferenceData={getSources:()=>sourceData,saveDraft:()=>{try{localStorage.setItem('iceLibraryDraft',JSON.stringify({books,sources:sourceData}));return true}catch(e){console.error('Could not save reference draft:',e);return false}}};
-window.IceSiteData={getBooks:()=>books,getSources:()=>sourceData,hasDraft:()=>!!localStorage.getItem('iceLibraryDraft'),hasPlaceholderSources:()=>sourceData.length>0&&sourceData.every(item=>!item.url&&String(item.title||"").startsWith("Sumber untuk disahkan:")),applyPublished:(bk,so)=>{if(Array.isArray(bk)&&bk.every(b=>b&&typeof b.title==='string'&&Array.isArray(b.pages)))books=deep(bk);if(Array.isArray(so))sourceData=deep(so);if(!document.getElementById('library').classList.contains('hidden'))renderShelf();if(!document.getElementById('reader').classList.contains('hidden'))renderPage();window.IceReferences?.render()}};
-</script><script src="soundscape.js?v=20261103-audio1"></script><script src="book-audio.js?v=continuous-narration-20261113"></script><script src="flipbook.js?v=continuous-narration-20261113"></script><script src="references.js?v=source-categories-20261113"></script><script src="storybook-world.js?v=20261103-animalduo2"></script><script src="site-config.js?v=teacher-sources-20261113"></script><script src="site-editor-ui.js?v=tiger-gif-fix-20261113"></script></body></html>
+window.IceSiteData={getBooks:()=>books,getSources:()=>sourceData,saveBooksDraft,hasDraft:()=>!!localStorage.getItem('iceLibraryDraft')||Boolean(window.IceBookDrafts?.hasRecoveredDraft?.()),hasPlaceholderSources:()=>sourceData.length>0&&sourceData.every(item=>!item.url&&String(item.title||"").startsWith("Sumber untuk disahkan:")),applyPublished:(bk,so)=>{if(Array.isArray(bk)&&bk.every(b=>b&&typeof b.title==='string'&&Array.isArray(b.pages)))books=deep(bk);if(Array.isArray(so))sourceData=deep(so);if(!document.getElementById('library').classList.contains('hidden'))renderShelf();if(!document.getElementById('reader').classList.contains('hidden'))renderPage();window.IceReferences?.render()}};
+</script><script src="soundscape.js?v=20261103-audio1"></script><script src="book-draft-store.js?v=mp3-storage-20261113"></script><script src="book-audio.js?v=mp3-storage-20261113"></script><script src="flipbook.js?v=continuous-narration-20261113"></script><script src="references.js?v=source-categories-20261113"></script><script src="storybook-world.js?v=20261103-animalduo2"></script><script src="site-config.js?v=teacher-sources-20261113"></script><script src="site-editor-ui.js?v=tiger-gif-fix-20261113"></script></body></html>
