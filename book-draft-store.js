@@ -57,5 +57,21 @@ async function clear(){
   tx.onerror=()=>reject(tx.error||new Error("Cannot clear book draft"));
  });
 }
-window.IceBookDrafts={read,write,clear,version:"indexeddb-multi-book-mp3-v1"};
+let changed=false,recovered=false;
+function markEdited(){changed=true;}
+const ready=read().then(record=>{
+ if(changed||!record||!Array.isArray(record.books))return false;
+ const localTime=Number(localStorage.getItem("iceLibraryDraftTimestamp")||0);
+ if(Number(record.modified||0)<localTime)return false;
+ // Restore large locally saved MP3s before public data is loaded.
+ const restored=window.IceSiteData?.applyLocalDraft?.(record.books,record.sources);
+ recovered=Boolean(restored);
+ return recovered;
+}).catch(error=>{
+ console.info("Using existing book draft or published content:",error.message);
+ return false;
+});
+window.IceBookDrafts={read,write,clear,ready,markEdited,
+ hasRecoveredDraft:()=>recovered,
+ version:"indexeddb-multi-book-mp3-v2"};
 })();
