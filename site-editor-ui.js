@@ -151,7 +151,7 @@ async function imageToDataURL(file){
  const gif=/\.gif$/i.test(file.name||"")||file.type==="image/gif";
  if(gif){
   // Animated GIFs must be read unchanged. Drawing them onto a canvas freezes frame 1.
-  if(file.size>1500000)throw Error("GIF 超过 1.5 MB。为避免浏览器草稿和 JSON 超出限制，请先压缩 GIF，或者上传到 GitHub 的 art/ 文件夹后填入图片 URL。");
+  if(file.size>6000000)throw Error("GIF 超过 6 MB。建议把大 GIF 上传到 GitHub art/ 文件夹，再填写图片链接，避免 JSON 过大。");
   const buffer=await file.arrayBuffer();
   const bytes=new Uint8Array(buffer);
   const signature=String.fromCharCode(...bytes.slice(0,6));
@@ -175,7 +175,7 @@ async function imageToDataURL(file){
 }
 function mediaFields(){
  const d=state();
- hint(body,"替换欢迎页背景、冰洞背景、猛犸象和剑齿虎图片。可以直接粘贴 HTTPS 图片链接或上传 PNG/JPG/WebP/GIF。GIF 会保留动画，但大小需在 1.5MB 以内；大文件请上传到 GitHub art/ 文件夹并填写 URL。原 SVG 动画中的耳朵/鼻子等细节需在 GitHub 修改 SVG 文件。");
+ hint(body,"替换欢迎页背景、冰洞背景、猛犸象和剑齿虎图片。可以直接粘贴 HTTPS 图片链接或上传 PNG/JPG/WebP/GIF。GIF 会保留动画；上传上限为 6 MB。较大的 GIF 建议使用 GitHub art/ 文件链接，避免 JSON 超大。原 SVG 动画中的耳朵/鼻子等细节需在 GitHub 修改 SVG 文件。");
  const media=[["welcome","🏠 首页背景"],["library","📚 冰洞书架背景"],["mammoth","🦣 猛犸象"],["tiger","🐅 剑齿虎"]];
  for(const [key,title] of media){
   const area=card(body,title);
@@ -194,14 +194,18 @@ function mediaFields(){
    if(!file.files?.length)return;
    try{
     const data=await imageToDataURL(file.files[0]);
-    const saved=core.update("images."+key,data);
+    const accepted=core.update("images."+key,data);
+    const saved=accepted && await core.waitForSave();
     render();
-    message(saved?"✅ 已替换"+title+(data.startsWith("data:image/gif;")?"（动态 GIF 已保留动画）":"")+"，首页和书架图片已同步更新。点击「看首页」立即预览。":
-      "⚠️ 已替换"+title+"，但无法保存在浏览器。"+(core.lastSaveError?.()||"请导出 JSON。"));
+    message(saved?"✅ 已保存"+title+(data.startsWith("data:image/gif;")?"（动态 GIF 保留动画）":"")+"，首页和书架已同步更新。请点击「看首页」。":
+      "⚠️ 图片显示在预览中，但保存失败。"+(core.lastSaveError?.()||"请使用 GitHub art/ 图片链接。"));
    }
    catch(e){message("⚠️ "+e.message);}
   });
   upload.append(file);area.append(upload);
+  if(key==="tiger"){
+   hint(area,"🐅 剑齿虎 GIF：现在可上传最大 6 MB 的动图。若图片超过上限，可先将 GIF 放到 GitHub 的 art/ 文件夹，再在上方填入 art/harimau.gif。上传后可直接点「看首页替换结果」。");
+  }
   area.append(button("👁 看首页替换结果",()=>{
    if(typeof window.show==="function")window.show("welcome");
    window.scrollTo({top:0,behavior:"smooth"});
@@ -215,7 +219,8 @@ function mediaFields(){
    if(current.startsWith("data:image/gif;")){message("ℹ️ GIF 不能自动裁剪，因为裁剪会使动画变成静态图片。请使用保留动画的 GIF 编辑工具裁剪，再重新上传。");return;}
    try{
     const processed=await imageSourceToDataURL(current);
-    const saved=core.update("images."+key,processed);
+    const accepted=core.update("images."+key,processed);
+    const saved=accepted && await core.waitForSave();
     render();message(saved?"✅ 图片边缘已处理，首页已同步。":"⚠️ 图片已裁剪，但保存失败："+(core.lastSaveError?.()||"请导出 JSON。"));
    }catch(error){message("⚠️ "+error.message);}
   },true));
