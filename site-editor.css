@@ -52,3 +52,11 @@ body{color:var(--ice-ink,#214c69)}
 }
 .world-mammoth,.world-sabertooth{transition:width .18s ease-out;}
 @media(prefers-reduced-motion:reduce){.world-mammoth,.world-sabertooth{transition:none!important}}
+
+/* Each book page's native image / video uploader and preview */
+.book-native-upload{display:grid;gap:10px;margin:12px 0;padding:15px;border:2px solid #9bcac9;background:#ebfaf2;border-radius:14px}
+.book-native-upload b{color:#285a77}
+.book-native-upload input[type=file]{width:100%;border:2px dashed #99b9c7;background:#fffefa;border-radius:10px;padding:11px;min-height:44px}
+.book-native-upload .status{margin:0;font-size:.86rem;overflow-wrap:anywhere}
+.book-native-preview{display:block;width:auto;max-width:100%;max-height:280px;border-radius:12px;background:#dceef4;object-fit:contain;margin:auto}
+.book-native-upload video{width:100%;height:auto;aspect-ratio:16/9}
