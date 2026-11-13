@@ -357,23 +357,30 @@ function copyText(text){
  .catch(()=>{core.download();message("复制失败，已改为下载 JSON 文件。");});
 }
 function publishing(){
- const area=card(body,"🚀 把所有修改发布给学生");
- hint(area,"这是 GitHub Pages 静态网站。老师编辑后先保存在自己的浏览器，其他学生暂时看不到；把 published-content.json 提交到 GitHub 后，全班便能看到新版。");
- const list=make("ol");
- ["先确认首页、书本、题目和 E-Sumber 都编辑完成。",
-  "点击「下载整站 JSON」，或复制整站 JSON。",
-  "打开 GitHub 的 published-content.json，点击编辑铅笔。",
-  "把文件内容全部换成导出的 JSON，并点击 Commit changes。",
-  "GitHub Pages 部署为 Success 后，所有学生刷新网页即可查看更新。"].forEach(t=>list.append(make("li",t)));
- area.append(list);
+ const area=card(body,"🚀 Publish Buku, Gambar & Video");
+ hint(area,"上传的照片、GIF、视频先保存于本机浏览器。要让学生在其他设备看到，需要将原始媒体文件和 JSON 一起上传到 GitHub。没有设置人为 MB 上限；实际容量受设备及 GitHub 限制。");
+ const steps=make("ol");
+ [
+  "检查每本书每一页的照片与视频，确保可以在 Pratonton 正常播放。",
+  "点击「⬇ Eksport JSON / ZIP Media」：有直接上传的媒体时，会下载包含 published-content.json 及 media/ 文件的 ZIP；无本地媒体时下载 JSON。",
+  "如果下载的是 ZIP，先解压文件，并将 media/ 文件上传到 GitHub 仓库 media/ 文件夹。",
+  "打开 GitHub 的 published-content.json，编辑并用导出的完整 JSON 取代旧内容，点击 Commit changes。",
+  "GitHub Pages 显示 Success 后，学生在其他设备就能看到新照片与视频。"
+ ].forEach(t=>steps.append(make("li",t)));
+ area.append(steps);
  const buttons=make("div",null,"whole-edit-actions");
- buttons.append(button("⬇ 下载整站 JSON",()=>{core.download();message("✅ 已下载 published-content.json。");}));
- buttons.append(button("📋 复制整站 JSON",()=>copyText(JSON.stringify(core.bundle(),null,2)),true));
- buttons.append(button("🐙 打开 GitHub 发布文件",()=>window.open(
+ buttons.append(button("⬇ Eksport JSON / ZIP Media",async()=>{
+  message("📦 正在检查和导出书本文件…");
+  await core.download();
+ },false));
+ buttons.append(button("📋 复制 JSON（仅文字与链接）",()=>copyText(JSON.stringify(core.bundle(),null,2)),true));
+ buttons.append(button("📁 GitHub media/ 文件夹",()=>window.open(
+  "https://github.com/g-ipgp24075232-maker/ice-age-virtual-library/tree/main/media","_blank","noopener,noreferrer"),true));
+ buttons.append(button("🐙 GitHub published-content.json",()=>window.open(
   "https://github.com/g-ipgp24075232-maker/ice-age-virtual-library/edit/main/published-content.json","_blank","noopener,noreferrer"),true));
- buttons.append(button("⬆ 导入备份 JSON",()=>document.getElementById("importFile")?.click(),true));
+ buttons.append(button("⬆ Import JSON",()=>document.getElementById("importFile")?.click(),true));
  area.append(buttons);
- hint(area,"安全提示：任何人都可在自己的浏览器里编辑草稿，但只有你的 GitHub 账户有提交权限，才能把修改发布到正式网站。这里不收集 GitHub 密码或 Token。");
+ hint(area,"请注意：直接复制 JSON 不会包含原始上传视频！有本机上传的照片或视频，必须使用 ZIP 导出并提交 media/ 文件。大文件在下载 ZIP 时可能受浏览器内存、设备存储或 GitHub 上传限制，必要时可使用媒体 URL。");
 }
 function render(){
  tabs.querySelectorAll("button").forEach(b=>{
