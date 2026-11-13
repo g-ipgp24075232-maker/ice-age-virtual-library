@@ -37,8 +37,9 @@ jobs:
           test -s "$PKG/vision_bundle.mjs"
           test -d "$PKG/wasm"
           mkdir -p site/vendor/mediapipe/models
-          cp index.html gesture.js flipbook.js soundscape.js references.js storybook-world.js storybook-theme.css site-config.js site-editor-ui.js site-editor.css published-content.json book-audio.js book-draft-store.js site/
+          cp index.html gesture.js flipbook.js soundscape.js references.js storybook-world.js storybook-theme.css site-config.js site-editor-ui.js site-editor.css published-content.json book-audio.js book-draft-store.js book-media.js site/
           cp -R audio site/audio
+          cp -R media site/media
           cp -R art site/art
           cp "$PKG/vision_bundle.mjs" site/vendor/mediapipe/vision_bundle.mjs
           cp -R "$PKG/wasm" site/vendor/mediapipe/
@@ -57,6 +58,9 @@ jobs:
           node --check site-editor-ui.js
           node --check book-audio.js
           node --check book-draft-store.js
+          node --check book-media.js
+          test -s site/book-media.js
+          test -d site/media
           test -s site/book-audio.js
           test -d site/audio
           python3 -m json.tool published-content.json > /dev/null
