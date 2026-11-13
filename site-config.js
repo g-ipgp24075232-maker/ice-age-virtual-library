@@ -38,8 +38,8 @@ const max=(v,lo,hi)=>Math.max(lo,Math.min(hi,Number(v)||0));
 const str=v=>String(v==null?"":v);
 const colors=v=>/^#[a-fA-F0-9]{6}$/.test(str(v));
 const asset=v=>/^https:\/\/[^\s"'<>()]+$/i.test(str(v))||
- /^art\/[\w./-]+\.(svg|webp|png|jpg|jpeg)$/i.test(str(v))||
- /^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(str(v));
+ /^art\/[\w./-]+\.(svg|webp|png|jpg|jpeg|gif)$/i.test(str(v))||
+ /^data:image\/(png|jpeg|webp|gif);base64,[a-z0-9+/=]+$/i.test(str(v));
 const http=v=>/^https:\/\/[^\s"'<>()]+$/i.test(str(v));
 const groups=[
  ["🏠 首页",["welcomeStamp","welcomeTitle","welcomeSubtitle","welcomeDescription","welcomeButton","animalCaption"]],
@@ -86,7 +86,7 @@ function normalize(raw){
    out.blocks[key]=raw.blocks[key].slice(0,60).filter(x=>x&&["heading","text","image","video","link"].includes(x.type))
    .map(x=>({id:str(x.id)||"b"+Math.random().toString(36).slice(2),
     type:x.type,text:str(x.text).slice(0,7000),
-    url:str(x.url).slice(0,2000000),alt:str(x.alt).slice(0,500)}));
+    url:str(x.url).slice(0,3300000),alt:str(x.alt).slice(0,500)}));
   }
  }
  return out;
