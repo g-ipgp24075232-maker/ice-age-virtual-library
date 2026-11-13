@@ -47,6 +47,7 @@ let bookDraftTimer=null;
 let bookDraftSaveSequence=Promise.resolve(true);
 function saveBooksDraft(){
  if(bookDraftTimer){clearTimeout(bookDraftTimer);bookDraftTimer=null;}
+ window.IceBookDrafts?.markEdited?.();
  const snapshot={books:deep(books),sources:deep(sourceData),modified:Date.now()};
  const info=$("editStatus");
  if(info)info.textContent="💾 Sedang menyimpan draf buku dan rakaman MP3...";
@@ -89,5 +90,16 @@ document.addEventListener('keydown',e=>{if($('reader').classList.contains('hidde
 window.BookPageState={getIndex:()=>pageIndex,getBookIndex:()=>bookIndex,setIndex:n=>{pageIndex=n},pageCount:()=>books[bookIndex]?.pages?.length||0};
 window.IceEditingBook={getIndex:()=>editIndex,getPageIndex:()=>editPageIndex};
 window.IceReferenceData={getSources:()=>sourceData,saveDraft:()=>{try{localStorage.setItem('iceLibraryDraft',JSON.stringify({books,sources:sourceData}));return true}catch(e){console.error('Could not save reference draft:',e);return false}}};
-window.IceSiteData={getBooks:()=>books,getSources:()=>sourceData,saveBooksDraft,hasDraft:()=>!!localStorage.getItem('iceLibraryDraft')||Boolean(window.IceBookDrafts?.hasRecoveredDraft?.()),hasPlaceholderSources:()=>sourceData.length>0&&sourceData.every(item=>!item.url&&String(item.title||"").startsWith("Sumber untuk disahkan:")),applyPublished:(bk,so)=>{if(Array.isArray(bk)&&bk.every(b=>b&&typeof b.title==='string'&&Array.isArray(b.pages)))books=deep(bk);if(Array.isArray(so))sourceData=deep(so);if(!document.getElementById('library').classList.contains('hidden'))renderShelf();if(!document.getElementById('reader').classList.contains('hidden'))renderPage();window.IceReferences?.render()}};
+window.IceSiteData={getBooks:()=>books,getSources:()=>sourceData,saveBooksDraft,
+ applyLocalDraft:(bk,so)=>{
+   if(!Array.isArray(bk)||!bk.every(b=>b&&typeof b.title==='string'&&Array.isArray(b.pages)))return false;
+   books=deep(bk);
+   if(Array.isArray(so))sourceData=deep(so);
+   if(!$("library").classList.contains("hidden"))renderShelf();
+   if(!$("reader").classList.contains("hidden"))renderPage();
+   if(!$("edit").classList.contains("hidden"))renderEditor();
+   window.IceReferences?.render();
+   return true;
+ },
+ hasDraft:()=>!!localStorage.getItem('iceLibraryDraft')||Boolean(window.IceBookDrafts?.hasRecoveredDraft?.()),hasPlaceholderSources:()=>sourceData.length>0&&sourceData.every(item=>!item.url&&String(item.title||"").startsWith("Sumber untuk disahkan:")),applyPublished:(bk,so)=>{if(Array.isArray(bk)&&bk.every(b=>b&&typeof b.title==='string'&&Array.isArray(b.pages)))books=deep(bk);if(Array.isArray(so))sourceData=deep(so);if(!document.getElementById('library').classList.contains('hidden'))renderShelf();if(!document.getElementById('reader').classList.contains('hidden'))renderPage();window.IceReferences?.render()}};
 </script><script src="soundscape.js?v=20261103-audio1"></script><script src="book-draft-store.js?v=mp3-storage-20261113"></script><script src="book-audio.js?v=mp3-storage-20261113"></script><script src="flipbook.js?v=continuous-narration-20261113"></script><script src="references.js?v=source-categories-20261113"></script><script src="storybook-world.js?v=20261103-animalduo2"></script><script src="site-config.js?v=teacher-sources-20261113"></script><script src="site-editor-ui.js?v=tiger-gif-fix-20261113"></script></body></html>
