@@ -18,8 +18,8 @@ const initial={
   readerInstruction:"📖 Gestur selfie: cubit ibu jari dan telunjuk di kanan, seret ke kiri, kemudian lepaskan untuk menyelak halaman. Tetikus dan sentuhan juga disokong.",
   readerPrevious:"← Sebelum",readerNarrate:"🔊 Dengar Cerita",readerStop:"⏹ Henti",readerNext:"Seterusnya →",
   sourcesTitle:"📚 Pusat E-Sumber & Sumber Rujukan",
-  sourcesIntro:"Ruang rujukan untuk pengembaraan Zaman Air Batu. Semak maklumat penulis, tajuk, tahun dan pautan sumber asal sebelum digunakan. Penilaian 5K: Kredibiliti, Ketepatan, Konteks, Kesepadanan dan Keselamatan.",
-  sourcesNotice:"Senarai asal hanyalah cadangan institusi dan belum disahkan sebagai rujukan akademik. Guru boleh menambah sumber yang sebenar.",
+  sourcesIntro:"Enam sumber rujukan guru Sejarah Tahun 4 tentang Zaman Air Batu, disusun mengikut kategori institusi maklumat. Klik pautan sumber asal dan baca Sinopsis Kandungan di bawah setiap pautan.",
+  sourcesNotice:"Rujukan disediakan untuk semakan guru. Sesetengah pautan laman luar mungkin memerlukan akses internet atau mempunyai sekatan sementara. Kajian PNAS/PMC ialah bacaan lanjutan untuk guru.",
   teacherTitle:"Panel Suntingan Guru",
   teacherNotice:"Semua halaman dan bahan boleh disunting di sini. Simpan draf dan terbit melalui GitHub untuk dikongsi kepada murid.",
   footer:"Sejarah Tahun 4 · KSSR Semakan · Bahan interaktif boleh disunting oleh guru"
@@ -347,11 +347,12 @@ readIndexedDraft().then(record=>{
  }).then(published=>{
   if(!published||typeof published!=="object")return;
   if(!hasDraft&&published.site)importConfig(published.site,false);
-  if(!window.IceSiteData?.hasDraft?.()){
-   const books=Array.isArray(published.books)?published.books:null;
-   const sources=Array.isArray(published.sources)?published.sources:null;
-   if(books||sources)window.IceSiteData?.applyPublished(books,sources);
-  }
+  // Update old placeholder references without overwriting locally edited books.
+  const existingBookDraft=Boolean(window.IceSiteData?.hasDraft?.());
+  const placeholderSources=Boolean(window.IceSiteData?.hasPlaceholderSources?.());
+  const books=!existingBookDraft&&Array.isArray(published.books)?published.books:null;
+  const sources=(!existingBookDraft||placeholderSources)&&Array.isArray(published.sources)?published.sources:null;
+  if(books||sources)window.IceSiteData?.applyPublished(books,sources);
  }).catch(()=>{});
 });
 })();
