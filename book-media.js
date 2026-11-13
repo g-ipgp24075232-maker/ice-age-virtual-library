@@ -35,7 +35,8 @@ function mediaName(file){
  .replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9._-]/gi,"-").replace(/-+/g,"-")
  .slice(-95).replace(/^\.+/,"");
  const ext=String(file.type||"").startsWith("video/")?"video":
-   String(file.type||"").startsWith("image/")?"image":"file";
+   String(file.type||"").startsWith("image/")?"image":
+   String(file.type||"").startsWith("audio/")?"audio":"file";
  return name||ext+"-upload";
 }
 function validFile(file,kind){
@@ -44,8 +45,10 @@ function validFile(file,kind){
  const ext=(file.name||"").toLowerCase();
  const image=v.startsWith("image/")||/\.(png|jpg|jpeg|webp|gif|avif)$/i.test(ext);
  const video=v.startsWith("video/")||/\.(mp4|webm|ogv|mov|m4v)$/i.test(ext);
+ const audio=v.startsWith("audio/")||/\.(mp3)$/i.test(ext);
  if(kind==="image"&&!image)throw Error("请上传图片（PNG、JPG、GIF、WebP 等）。");
  if(kind==="video"&&!video)throw Error("请上传视频（MP4、WebM、MOV 等）。");
+ if(kind==="audio"&&(!audio||!/\.mp3$/i.test(ext)))throw Error("请选择 MP3 文件。");
 }
 async function upload(file,block){
  validFile(file,block.type);
@@ -65,6 +68,15 @@ async function upload(file,block){
   throw Error("图片／视频已读取，但草稿保存失败。请检查浏览器储存权限。");
  }
  return record;
+}
+async function uploadAudio(file){
+ validFile(file,"audio");
+ const id="bookaudio-"+crypto.randomUUID();
+ const path="media/"+id+"-"+mediaName(file);
+ const record={id,path,blob:file,name:file.name,type:"audio/mpeg",
+   size:file.size,modified:Date.now()};
+ await storeBlob(record);
+ return {url:path,mediaId:id,name:file.name};
 }
 async function getUrl(id){
  if(urls.has(id))return urls.get(id);
@@ -110,10 +122,18 @@ async function downloadSingle(id){
 async function getReferencedFiles(){
  const map=new Map();
  for(const book of window.IceSiteData?.getBooks?.()||[]){
+  for(const track of book.audioTracks||[]){
+   if(track?.mediaId&&track.url?.startsWith("media/"))map.set(track.mediaId,track.url);
+  }
   for(const page of book.pages||[]){
    for(const block of page.blocks||[]){
     if(block.mediaId&&block.url?.startsWith("media/")){
      map.set(block.mediaId,block.url);
+    }
+   }
+   for(const track of page.audioTracks||[]){
+    if(track?.mediaId&&track.url?.startsWith("media/")){
+     map.set(track.mediaId,track.url);
     }
    }
   }
@@ -209,6 +229,6 @@ window.addEventListener("pagehide",()=>{
  for(const url of urls.values())URL.revokeObjectURL(url);
  urls.clear();if(zipObjectUrl)URL.revokeObjectURL(zipObjectUrl);
 });
-window.IceBookMedia={upload,read,getUrl,hydrate,fileSize,downloadSingle,
- getReferencedFiles,exportPackage,version:"direct-upload-no-size-cap-20261113"};
+window.IceBookMedia={upload,uploadAudio,read,getUrl,hydrate,fileSize,downloadSingle,
+ getReferencedFiles,exportPackage,version:"book-media-with-mp3-playlists-20261113"};
 })();
