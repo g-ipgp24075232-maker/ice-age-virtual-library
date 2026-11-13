@@ -111,7 +111,7 @@ pageEditor.querySelectorAll(".mp3-editor").forEach(n=>n.remove());
 const anchor=get("ePage")?.closest("label");const slot=document.createElement("div");
 make(slot,book,"🎙️ Audio Dengar Cerita — Buku");
 if(anchor)fields.insertBefore(slot.firstElementChild,anchor);else fields.append(slot.firstElementChild);
-const page=book.pages?.[window.BookPageState?.getIndex?.()||0];
+const page=book.pages?.[window.IceEditingBook?.getPageIndex?.()||0];
 if(page)make(pageEditor,page,"🎙️ Audio Dengar Cerita — Halaman");
 }
 window.IceBookAudio={playCurrent,stop,sync,onPageTurn,decorateEditor,version:"continuous-audio-across-page-turns-v2"};
