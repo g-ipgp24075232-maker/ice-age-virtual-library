@@ -128,7 +128,7 @@
       setIndex(from+d);
       window.renderPage();
       clear();
-      window.stopVoice?.();
+      window.IceBookAudio?.onPageTurn?.();
       window.playSound?.();
     });
     return true;
@@ -165,7 +165,7 @@
       }
       clear();
       if(shouldTurn){
-        window.stopVoice?.();
+        window.IceBookAudio?.onPageTurn?.();
         window.playSound?.();
       }
     });
@@ -216,7 +216,7 @@
         window.renderPage();
       }
       clear();
-      if(success){window.stopVoice?.();window.playSound?.();}
+      if(success){window.IceBookAudio?.onPageTurn?.();window.playSound?.();}
     });
     try{stage.releasePointerCapture(e.pointerId);}catch(_){}
   }
