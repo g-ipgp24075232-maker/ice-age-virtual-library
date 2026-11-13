@@ -294,11 +294,27 @@ function bundle(){
  return {version:1,site:d(config),books:window.IceSiteData?.getBooks?.()||[],
   sources:window.IceSiteData?.getSources?.()||[],publishedAt:new Date().toISOString()};
 }
-function download(){
- const blob=new Blob([JSON.stringify(bundle(),null,2)],{type:"application/json"});
- const url=URL.createObjectURL(blob),a=document.createElement("a");
- a.href=url;a.download="published-content.json";document.body.append(a);a.click();a.remove();
- setTimeout(()=>URL.revokeObjectURL(url),2000);
+async function download(){
+ try{
+  // Uploaded images/videos are stored as original files, not oversized Base64.
+  // Export a ZIP containing media/ and published-content.json together.
+  const uploaded=await window.IceBookMedia?.getReferencedFiles?.();
+  if(uploaded?.length){
+   await window.IceBookMedia.exportPackage(message=>{
+    const status=document.getElementById("editStatus");
+    if(status)status.textContent=message;
+   });
+   return;
+  }
+  const blob=new Blob([JSON.stringify(bundle(),null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="published-content.json";document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+ }catch(error){
+  const m="⚠️ Eksport gagal: "+(error?.message||error)+". Semak media yang belum disimpan atau gunakan pautan URL.";
+  const status=document.getElementById("editStatus");if(status)status.textContent=m;
+  window.alert(m);
+ }
 }
 function reset(){
  config=normalize(null);save();apply();return d(config);
