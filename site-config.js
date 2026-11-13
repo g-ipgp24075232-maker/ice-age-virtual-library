@@ -341,6 +341,7 @@ readIndexedDraft().then(record=>{
  }
 }).catch(error=>console.info("IndexedDB draft unavailable:",error.message))
 .finally(()=>{
+ Promise.resolve(window.IceBookDrafts?.ready).catch(()=>false).finally(()=>{
  fetch("./published-content.json",{cache:"no-store"}).then(response=>{
   if(!response.ok)throw Error("no published settings");
   return response.json();
@@ -354,5 +355,6 @@ readIndexedDraft().then(record=>{
   const sources=(!existingBookDraft||placeholderSources)&&Array.isArray(published.sources)?published.sources:null;
   if(books||sources)window.IceSiteData?.applyPublished(books,sources);
  }).catch(()=>{});
+ });
 });
 })();
