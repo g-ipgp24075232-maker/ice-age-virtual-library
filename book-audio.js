@@ -6,6 +6,7 @@ const b=()=>books()[window.BookPageState?.getBookIndex?.()||0];
 const p=()=>b()?.pages?.[window.BookPageState?.getIndex?.()||0];
 const valid=x=>/^(https:\/\/|audio\/|data:audio\/mpeg;base64,)/i.test(String(x||""));
 let player=null;
+let playingSource="";
 const status=document.createElement("p");
 status.id="mp3StudentStatus";status.setAttribute("role","status");status.style.textAlign="center";
 status.textContent="🔊 Dengar Cerita: MP3 guru atau suara automatik";
@@ -20,15 +21,16 @@ ttsBtn.style.cssText="display:block;margin:8px auto 18px;font-size:.88rem";
 function note(x){status.textContent=x;}
 function stop(){
 if(player){player.pause();player.removeAttribute("src");player.load();}
+playingSource="";
 window.IceSoundscape?.duckForNarration(false);
- sync();
+sync();
 }
 function play(src){
 if(!valid(src))return false;
 stop();
-player=player||new Audio();player.src=src;
-player.onended=()=>{window.IceSoundscape?.duckForNarration(false);note("✅ Cerita tamat.");};
-player.onerror=()=>{window.IceSoundscape?.duckForNarration(false);note("⚠️ Fail MP3 gagal dimainkan. Cuba suara automatik.");};
+player=player||new Audio();player.src=src;playingSource=src;
+player.onended=()=>{playingSource="";window.IceSoundscape?.duckForNarration(false);note("✅ Cerita tamat.");};
+player.onerror=()=>{playingSource="";window.IceSoundscape?.duckForNarration(false);note("⚠️ Fail MP3 gagal dimainkan. Cuba suara automatik.");};
 window.IceSoundscape?.duckForNarration(true);
 note("▶ Memainkan rakaman MP3...");
 player.play().catch(e=>{window.IceSoundscape?.duckForNarration(false);note("⚠️ "+e.message);});
@@ -39,7 +41,23 @@ const page=p(),book=b();const src=valid(page?.audioUrl)?page.audioUrl:book?.audi
 if(!valid(src))return false;
 return play(src);
 }
-function sync(){note(valid(p()?.audioUrl)?"🎙️ Halaman ini ada rakaman MP3.":valid(b()?.audioUrl)?"🎙️ Buku ini ada rakaman MP3.":"🔊 Tiada MP3, bacaan suara automatik Bahasa Melayu tersedia.");}
+function sync(){
+ if(player && !player.paused && playingSource){
+  note("▶ Rakaman MP3 masih dimainkan. Anda boleh terus menyelak halaman tanpa menghentikan audio.");
+  return;
+ }
+ if(window.speechSynthesis?.speaking){
+  note("🔊 Bacaan suara automatik sedang berjalan dan tidak terhenti ketika menyelak.");
+  return;
+ }
+ note(valid(p()?.audioUrl)?"🎙️ Halaman ini ada rakaman MP3.":valid(b()?.audioUrl)?"🎙️ Buku ini ada rakaman MP3.":"🔊 Tiada MP3, bacaan suara automatik Bahasa Melayu tersedia.");
+}
+function onPageTurn(){
+ // Deliberately keep the same Audio and SpeechSynthesisUtterance alive, even
+ // when a different page has its own narration. Starting that narration is an
+ // explicit choice via the Dengar Cerita button.
+ sync();
+}
 function count(){
 let n=0;for(const book of books())for(const x of [book.audioUrl,...(book.pages||[]).map(p=>p.audioUrl)])
 if(String(x||"").startsWith("data:audio/"))n+=String(x).length;
@@ -96,5 +114,5 @@ if(anchor)fields.insertBefore(slot.firstElementChild,anchor);else fields.append(
 const page=book.pages?.[window.BookPageState?.getIndex?.()||0];
 if(page)make(pageEditor,page,"🎙️ Audio Dengar Cerita — Halaman");
 }
-window.IceBookAudio={playCurrent,stop,sync,decorateEditor,version:"mp3-narration-v1"};
+window.IceBookAudio={playCurrent,stop,sync,onPageTurn,decorateEditor,version:"continuous-audio-across-page-turns-v2"};
 })();
