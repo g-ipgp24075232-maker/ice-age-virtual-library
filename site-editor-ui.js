@@ -416,5 +416,5 @@ const reset=button("↺ 恢复默认设计",()=>{
  core.reset();render();message("设计已经恢复默认状态。");
 },true);actions.append(reset);
 render();
-window.IceWholeEditor={openTab:name=>{tab=name;render();host.scrollIntoView({behavior:"smooth",block:"start"});},render,version:"whole-editor-ui-20261103"};
+window.IceWholeEditor={openTab:name=>{tab=name;render();host.scrollIntoView({behavior:"smooth",block:"start"});},render,processImageUpload:imageToDataURL,version:"whole-editor-ui-gif-20261113"};
 })();
