@@ -10,14 +10,33 @@
   const filter=document.getElementById("referenceFilter");
   const toggle=document.getElementById("referenceEditToggle");
   if(!adapter||!container||!editor||!search||!filter||!toggle)return;
+  // Kategori Institusi Maklumat (bukan jenis fail seperti jurnal/laman web).
   const categories=[
-    ["artikel","Artikel / Jurnal"],
-    ["laman","Laman web rasmi"],
-    ["buku","Buku / E-buku"],
-    ["dokumen","Dokumen / Laporan"],
-    ["video","Video / Multimedia"],
-    ["lain","Lain-lain"]
+    ["arkib","Arkib"],
+    ["muzium","Muzium"],
+    ["memorial","Memorial"],
+    ["warisan","Tapak Warisan Sejarah"],
+    ["galeri","Galeri"],
+    ["perpustakaan","Perpustakaan"],
+    ["persatuan","Persatuan Sejarah"],
+    ["pusat","Pusat Sumber"],
+    ["bstp","Bahagian Sumber Teknologi Pendidikan (BSTP)"],
+    ["kerajaan","Kementerian/Jabatan/Agensi Kerajaan"]
   ];
+  // Also recognise drafts created before institution-based categories existed.
+  const legacyType={"artikel":"Perpustakaan","laman":"Pusat Sumber",
+    "buku":"Perpustakaan","dokumen":"Pusat Sumber","video":"Pusat Sumber","lain":"Lain-lain"};
+  const previousType={"artikel":"perpustakaan","laman":"pusat",
+    "buku":"perpustakaan","dokumen":"pusat","video":"pusat","lain":"pusat"};
+  const categoryKey=item=>categories.some(pair=>pair[0]===item?.type)?
+    item.type:(previousType[item?.type]||"pusat");
+  filter.replaceChildren();
+  const all=document.createElement("option");all.value="";all.textContent="Semua Kategori Institusi";filter.append(all);
+  categories.forEach(([id,label])=>{
+    const option=document.createElement("option");option.value=id;option.textContent=label;filter.append(option);
+  });
+  filter.setAttribute("aria-label","Tapis kategori institusi maklumat");
+  search.placeholder="🔎 Cari sumber, institusi atau sinopsis...";
   const checks=[
     ["kredibiliti","Kredibiliti (autoriti sumber)"],
     ["ketepatan","Ketepatan (fakta & bukti)"],
@@ -37,6 +56,15 @@
     ".reference-controls input{flex:2;min-width:175px;padding:11px;border:2px solid #b4ddec;border-radius:10px}",
     ".reference-controls select{flex:1;min-width:160px;padding:11px;border:2px solid #b4ddec;border-radius:10px;background:white}",
     ".reference-list{display:grid;gap:14px}",
+    ".reference-group{display:grid;gap:12px;margin:10px 0 20px}",
+    ".reference-group-title{font-size:1.17rem;color:#285977;border-bottom:3px solid #b7dce8;padding:9px 3px;margin:8px 0}",
+    ".reference-group-count{font-size:.8rem;font-weight:normal;color:#50738a;margin-left:8px}",
+    ".reference-linkbox{display:grid;gap:5px;background:#e6f5f9;border:1px solid #b9dde9;border-radius:11px;padding:11px;margin:13px 0;overflow-wrap:anywhere}",
+    ".reference-linkbox a{font-weight:700;text-decoration:underline;color:#115c9a}",
+    ".reference-linkbox .reference-url{font-size:.75rem;color:#506d85;overflow-wrap:anywhere}",
+    ".reference-synopsis-title{font-size:1.02rem;color:#315d77;margin:15px 0 4px}",
+    ".reference-institution{margin:8px 0;color:#385f7b}",
+    ".reference-card details.reference-bibliography{border-top:1px solid #d2e7ee;padding-top:10px}",
     ".reference-card{background:#f8fcff;border:2px solid #d5e9f3;border-radius:15px;padding:17px;border-left:7px solid #5ab0cf}",
     ".reference-card h3{margin:6px 0 4px;color:#174c72;font-size:1.2rem}",
     ".reference-card .reference-meta{display:flex;flex-wrap:wrap;gap:7px;align-items:center;color:#406785;font-size:.86rem}",
@@ -77,7 +105,7 @@
     parent.appendChild(node(tag,className,value));
   }
   function categoryLabel(key){
-    return categories.find(pair=>pair[0]===key)?.[1]||"Sumber rujukan";
+    return categories.find(pair=>pair[0]===key)?.[1]||legacyType[key]||"Kategori Institusi Maklumat";
   }
   function sourceAuthor(item){
     return text(item.author)||text(item.institution)||"Penulis tidak dinyatakan";
@@ -109,31 +137,36 @@
     const meta=node("div","reference-meta");
     meta.appendChild(node("span","reference-pill",categoryLabel(item.type)));
     if(text(item.topic))meta.appendChild(node("span","reference-pill",item.topic));
-    if(!isUrl(item.url))meta.appendChild(node("span","reference-pill reference-warning","Perlu pautan sah"));
-    else meta.appendChild(node("span","reference-pill reference-warning","Pautan belum disahkan"));
     card.appendChild(meta);
     card.appendChild(node("h3","",text(item.title)||"Rujukan tanpa tajuk"));
-    const sub=node("div","reference-meta");
-    sub.appendChild(node("span","",sourceAuthor(item)+" · "+sourceYear(item)));
-    if(text(item.publisher))sub.appendChild(node("span","","· "+item.publisher));
-    card.appendChild(sub);
-    const citeBox=node("div","reference-apa");
-    const label=node("b","","Cadangan format rujukan");
-    citeBox.appendChild(label);citeBox.appendChild(node("p","",citation(item)));
-    card.appendChild(citeBox);
-    appendTextBlock(card,item.description);
+    const institution=node("p","reference-institution");
+    institution.append(node("strong","","Institusi: "),document.createTextNode(text(item.institution)||text(item.publisher)||text(item.author)||"Tidak dinyatakan"));
+    card.appendChild(institution);
+    // Direct original URL ABOVE the synopsis, as required for teacher references.
+    const linkBox=node("div","reference-linkbox");
+    linkBox.appendChild(node("strong","","Pautan Sumber Asal"));
     if(isUrl(item.url)){
-      const link=node("a","","🔗 Buka sumber asal");
+      const link=node("a","reference-primary-link","🔗 Buka Sumber Asal");
       link.href=text(item.url);link.target="_blank";link.rel="noopener noreferrer";
-      card.appendChild(link);
+      linkBox.appendChild(link);
+      linkBox.appendChild(node("small","reference-url",text(item.url)));
     }else{
-      card.appendChild(node("p","reference-note","Belum ada pautan HTTPS yang boleh dibuka. Guru perlu semak sumber asal."));
+      linkBox.appendChild(node("span","reference-note","Pautan HTTPS belum disediakan. Guru boleh tambah pautan melalui Edit E-Sumber."));
+    }
+    card.appendChild(linkBox);
+    card.appendChild(node("h4","reference-synopsis-title","Sinopsis Kandungan"));
+    appendTextBlock(card,item.description||item.synopsis||"Sinopsis belum ditambah.");
+    // Optional bibliographic details after the synopsis.
+    if(text(item.year)||text(item.author)||text(item.publisher)){
+      const details=document.createElement("details");details.className="reference-bibliography";
+      details.appendChild(node("summary","","Maklumat bibliografi"));
+      details.appendChild(node("p","reference-apa",citation(item)));
+      card.appendChild(details);
     }
     const ev=item.evaluation||{};
     if(checks.some(pair=>text(ev[pair[0]]))){
       const details=document.createElement("details");
-      const title=node("summary","","Penilaian Sumber 5K");
-      details.appendChild(title);
+      details.appendChild(node("summary","","Penilaian Sumber 5K"));
       checks.forEach(([key,label])=>{
         if(text(ev[key]))appendTextBlock(details,label+": "+ev[key]);
       });
@@ -149,8 +182,7 @@
       },true));
       actions.appendChild(button("🗑 Padam",()=>{
         if(!window.confirm("Padam rujukan ini daripada draf setempat?"))return;
-        const list=roots();
-        const i=list.indexOf(item);
+        const list=roots(),i=list.indexOf(item);
         if(i<0)return;
         list.splice(i,1);
         if(editingId===item.id)editingId=null;
@@ -164,15 +196,31 @@
     const q=text(search.value).toLowerCase();
     const type=text(filter.value);
     const entries=roots().filter(item=>
-      (!type||(item.type||"laman")===type)&&
-      (!q||[item.title,item.author,item.institution,item.publisher,item.year,item.description,item.topic,item.url]
+      (!type||categoryKey(item)===type)&&
+      (!q||[item.title,item.author,item.institution,item.publisher,item.year,item.description,item.synopsis,item.topic,item.url,categoryLabel(item.type)]
         .some(value=>text(value).toLowerCase().includes(q)))
     );
     container.replaceChildren();
     const count=document.getElementById("referenceCount");
     if(count)count.textContent=entries.length+" daripada "+roots().length+" sumber rujukan";
-    if(!entries.length)container.append(node("p","reference-empty","Tiada rujukan sepadan. Cuba carian lain atau tambah sumber baharu."));
-    else entries.forEach((item,index)=>container.appendChild(buildCard(item,index)));
+    if(!entries.length)container.append(node("p","reference-empty","Tiada rujukan sepadan. Cuba kategori atau carian lain."));
+    else{
+      const groups=new Map();
+      entries.forEach((item,index)=>{
+        const key=categoryKey(item);
+        if(!groups.has(key))groups.set(key,[]);
+        groups.get(key).push({item,index});
+      });
+      // When no category filter is active, group by institution category.
+      for(const [category,items] of groups){
+        const group=node("section","reference-group");
+        const header=node("h2","reference-group-title",categoryLabel(category));
+        header.appendChild(node("span","reference-group-count","("+items.length+" sumber)"));
+        group.appendChild(header);
+        items.forEach(({item,index})=>group.appendChild(buildCard(item,index)));
+        container.appendChild(group);
+      }
+    }
     toggle.textContent=editMode?"✕ Tutup Mod Suntingan":"✏️ Edit E-Sumber (Guru)";
   }
   function input(parent,label,key,value,kind="input",hint=""){
@@ -196,7 +244,7 @@
     const list=roots();
     const item=id==null?null:list.find((it,index)=>String(it.id??index)===String(id));
     const record=item?JSON.parse(JSON.stringify(item)):{
-      id:uid(),type:"laman",author:"",institution:"",year:"",title:"",publisher:"",
+      id:uid(),type:"kerajaan",author:"",institution:"",year:"",title:"",publisher:"",
       topic:"Zaman Air Batu",description:"",url:"",evaluation:{}
     };
     const frm=node("form","reference-form");
@@ -206,20 +254,21 @@
     frm.append(node("p","reference-note","Masukkan maklumat daripada sumber asal. Jangan reka nama penulis atau tahun penerbitan. Format rujukan disediakan sebagai panduan sahaja."));
     const grid=node("div","reference-form-grid");
     const titleField=input(grid,"Tajuk sumber *","title",record.title);
-    const author=input(grid,"Penulis / Organisasi","author",record.author||record.institution);
+    const institution=input(grid,"Institusi / Organisasi","institution",record.institution);
+    const author=input(grid,"Penulis / Penyedia (pilihan)","author",record.author);
     const year=input(grid,"Tahun penerbitan","year",record.year);
     const publisher=input(grid,"Penerbit / Nama laman","publisher",record.publisher);
     const url=input(grid,"Pautan sumber (HTTPS)","url",record.url);
     const topic=input(grid,"Topik / Kata kunci","topic",record.topic);
     frm.append(grid);
-    const typeLabel=node("label","","Jenis sumber");typeLabel.htmlFor="refType";
+    const typeLabel=node("label","","Kategori Institusi Maklumat");typeLabel.htmlFor="refType";
     const sel=document.createElement("select");sel.name="type";sel.id="refType";
     categories.forEach(([value,label])=>{
       const option=document.createElement("option");option.value=value;option.textContent=label;
       sel.append(option);
-    });sel.value=record.type||"laman";
+    });sel.value=categoryKey(record);
     frm.append(typeLabel,sel);
-    input(frm,"Huraian / Bagaimana sumber membantu murid?","description",record.description,"textarea");
+    input(frm,"Sinopsis Kandungan","description",record.description,"textarea");
     const details=document.createElement("details");
     const summary=node("summary","","Penilaian 5K (pilihan)");details.append(summary);
     checks.forEach(([key,label])=>{
@@ -246,7 +295,7 @@
       const saved={
         ...record,
         title:text(values.title),author:text(values.author),
-        institution:text(values.author),year:text(values.year),publisher:text(values.publisher),
+        institution:text(values.institution),year:text(values.year),publisher:text(values.publisher),
         url:text(values.url),topic:text(values.topic),type:values.type,
         description:text(values.description),evaluation:{}
       };
