@@ -91,20 +91,78 @@ function normalize(raw){
  }
  return out;
 }
-let config=normalize(null),hasDraft=false,lastSaveError="";
+let config=normalize(null),hasDraft=false,lastSaveError="",changedThisSession=false;
+const DB_NAME="iceAgeWholeSiteMediaDrafts",DB_STORE="siteDrafts",DRAFT_RECORD="current";
+let latestSave=Promise.resolve(true);
+let idbQueue=Promise.resolve();
+let localTimestamp=0;
 try{
  const saved=localStorage.getItem(K);
  if(saved){config=normalize(JSON.parse(saved));hasDraft=true;}
+ localTimestamp=Number(localStorage.getItem(K+"-savedAt")||0);
 }catch(error){console.warn("Site settings:",error);}
+function openDraftDB(){
+ return new Promise((resolve,reject)=>{
+  if(!window.indexedDB){reject(Error("IndexedDB unavailable"));return;}
+  const request=indexedDB.open(DB_NAME,1);
+  request.onupgradeneeded=()=>{
+   if(!request.result.objectStoreNames.contains(DB_STORE))
+    request.result.createObjectStore(DB_STORE);
+  };
+  request.onsuccess=()=>resolve(request.result);
+  request.onerror=()=>reject(request.error||Error("IndexedDB open failed"));
+ });
+}
+async function readIndexedDraft(){
+ const db=await openDraftDB();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(DB_STORE,"readonly");
+  const request=tx.objectStore(DB_STORE).get(DRAFT_RECORD);
+  request.onsuccess=()=>resolve(request.result||null);
+  request.onerror=()=>reject(request.error||Error("IndexedDB read failed"));
+  tx.oncomplete=()=>db.close();
+  tx.onabort=()=>db.close();
+ });
+}
+async function writeIndexedDraft(json,modified){
+ const db=await openDraftDB();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(DB_STORE,"readwrite");
+  tx.objectStore(DB_STORE).put({json,modified},DRAFT_RECORD);
+  tx.oncomplete=()=>{db.close();resolve(true);};
+  tx.onerror=()=>{db.close();reject(tx.error||Error("IndexedDB write failed"));};
+  tx.onabort=()=>{db.close();reject(tx.error||Error("IndexedDB write aborted"));};
+ });
+}
 function save(){
- try{localStorage.setItem(K,JSON.stringify(config));hasDraft=true;lastSaveError="";return true;}
- catch(error){
-  lastSaveError=error&&error.name==="QuotaExceededError"?
-   "浏览器储存空间不足，请压缩图片或先导出 JSON。":
-   "无法将编辑内容保存到浏览器："+String(error&&error.message||error);
-  console.error("Site draft saving failed:",error);
-  return false;
+ const payload=JSON.stringify(config),modified=Date.now();
+ changedThisSession=true;
+ let savedLocal=false;
+ try{
+  localStorage.setItem(K,payload);
+  localStorage.setItem(K+"-savedAt",String(modified));
+  localTimestamp=modified;savedLocal=true;hasDraft=true;lastSaveError="";
+ }catch(error){
+  lastSaveError=error?.name==="QuotaExceededError"?
+   "图片较大，本地常规储存空间不足；正在改存容量更大的 IndexedDB。":
+   "浏览器储存受限，正在尝试 IndexedDB："+String(error?.message||error);
  }
+ const queued=idbQueue.catch(()=>{}).then(()=>writeIndexedDraft(payload,modified));
+ idbQueue=queued;
+ latestSave=queued.then(()=>{
+  hasDraft=true;lastSaveError="";
+  return true;
+ }).catch(error=>{
+  if(savedLocal)return true;
+  lastSaveError="浏览器无法保存大 GIF："+String(error?.message||error)+
+   "。请改用 GitHub art/ 文件链接。";
+  console.warn(lastSaveError);
+  return false;
+ });
+ return savedLocal||!!window.indexedDB;
+}
+async function waitForSave(){
+ try{return await latestSave;}catch(_){return false;}
 }
 function apply(){
  document.title=config.text.siteTitle;
@@ -265,23 +323,35 @@ function applyAnimalSizing(){
  }
 }
 window.IceSiteCore={initial:d(initial),groups,sections,config:()=>d(config),get:()=>config,
- update,apply,save,reset,importConfig,bundle,download,playAudio,syncAudio,
+ update,apply,save,waitForSave,reset,importConfig,bundle,download,playAudio,syncAudio,
  lastSaveError:()=>lastSaveError,
  validAsset:asset,validUrl:http,normalize,hasDraft:()=>hasDraft,
  version:"full-site-core-20261103"};
 // Prefer a teacher's current draft over a published version. Others see the
 // committed public data file, not this device's localStorage.
 apply();
-fetch("./published-content.json",{cache:"no-store"}).then(response=>{
- if(!response.ok)throw Error("no published settings");
- return response.json();
-}).then(published=>{
- if(!published||typeof published!=="object")return;
- if(!hasDraft&&published.site)importConfig(published.site,false);
- if(!window.IceSiteData?.hasDraft?.()){
-  const books=Array.isArray(published.books)?published.books:null;
-  const sources=Array.isArray(published.sources)?published.sources:null;
-  if(books||sources)window.IceSiteData?.applyPublished(books,sources);
+// Large animated GIF drafts may not fit in localStorage. Restore IndexedDB first,
+// before published content; a current device's draft always takes precedence.
+readIndexedDraft().then(record=>{
+ if(!record||!record.json||changedThisSession)return;
+ if(Number(record.modified)>localTimestamp){
+  const restored=JSON.parse(record.json);
+  config=normalize(restored);
+  hasDraft=true;apply();
  }
-}).catch(()=>{});
+}).catch(error=>console.info("IndexedDB draft unavailable:",error.message))
+.finally(()=>{
+ fetch("./published-content.json",{cache:"no-store"}).then(response=>{
+  if(!response.ok)throw Error("no published settings");
+  return response.json();
+ }).then(published=>{
+  if(!published||typeof published!=="object")return;
+  if(!hasDraft&&published.site)importConfig(published.site,false);
+  if(!window.IceSiteData?.hasDraft?.()){
+   const books=Array.isArray(published.books)?published.books:null;
+   const sources=Array.isArray(published.sources)?published.sources:null;
+   if(books||sources)window.IceSiteData?.applyPublished(books,sources);
+  }
+ }).catch(()=>{});
+});
 })();
