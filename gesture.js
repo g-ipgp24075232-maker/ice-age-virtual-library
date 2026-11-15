@@ -333,7 +333,7 @@
       stopButton.disabled = false;
       setDiagnostic("OK: kamera, pustaka MediaPipe, WebAssembly dan model. Versi " + state.loadedVersion +
         "; peranti: " + navigator.userAgent);
-      status("✅ Gesture Flip sedia! Sapu tangan ke kiri / kanan untuk membalik halaman.");
+      status(window.IceNinja?.isInGame?.()?"✅ Kamera aktif! Buka tapak tangan, kunci kristal dan genggam untuk pecahkan ais.":"✅ Gesture Flip sedia! Sapu tangan ke kiri / kanan untuk membalik halaman.");
       loop();
     } catch (error) {
       state.lastErrorPhase = phase;
@@ -424,6 +424,14 @@
   // Webcam preview is mirrored. x measures the thumb/index pinch point in that preview.
   function process(points, now) {
     if (!Array.isArray(points) || points.length < 21) return;
+    // The Ice Age quiz exclusively handles palm / fist gestures in its book.
+    // Leave all other books' pinch-to-turn behavior entirely unchanged.
+    if (window.IceNinja?.isInGame?.()) {
+      if(state.grab) cancelGesture();
+      window.IceNinja.handleHand(points,now,state.mirrored);
+      gestureHint("❄️ Misi Penjaga Bumi: buka tapak tangan untuk sasarkan kristal; tunggu hingga terkunci, kemudian genggam ✊!",1);
+      return;
+    }
     const rawX = (points[4].x + points[8].x)*0.5;
     const x = state.mirrored ? 1-rawX : rawX;
     const pinch = isPinching(points);
@@ -520,6 +528,7 @@
         if (result.landmarks && result.landmarks.length) {
           process(result.landmarks[0], now);
         } else {
+          window.IceNinja?.onHandLost?.();
           state.noHandFrames++;
           if(state.grab && state.noHandFrames>8) {
             cancelGesture();
@@ -612,5 +621,5 @@
       prompt("Salin teks diagnostik ini:", message);
     }
   });
-  window.IceGesture = { toggle, show, stop, changeCamera };
+  window.IceGesture = { toggle, show, stop, start, changeCamera, isActive:()=>state.active };
 })();
