@@ -91,18 +91,19 @@ function exit(){
 }
 function shell(inner){
  mount.innerHTML='<div class="ninja-game">'+inner+'</div>';
+ theme(mode);
 }
 function topStats(){
- return '<div class="ninja-top"><div class="ninja-brand"><span class="ninja-top-icon">🦣</span> MISI PENJAGA BUMI <span class="ninja-top-icon">❄️</span></div>'+
+ return '<div class="ninja-top"><div class="ninja-brand"><span class="ninja-top-icon">🦣</span> '+esc(config().title)+' <span class="ninja-top-icon">❄️</span></div>'+
  '<div class="ninja-stats"><span class="ninja-stat">⭐ Markah <strong id="ninjaScore">'+points+'</strong></span>'+
  '<span class="ninja-stat">🏆 Betul <strong id="ninjaCorrect">'+correctAnswers+'</strong></span>'+
  '<span class="ninja-stat">📖 <strong>'+(questionIndex+1)+'</strong> / '+questions.length+'</span></div></div>';
 }
 function showIntro(){
- mode="intro";resetHand();
+ mode="intro";resetHand();const cfg=config();
  shell('<div class="ninja-start"><div class="ninja-mascot">🦣❄️</div>'+
- '<small>PERMAINAN INTERAKTIF SEJARAH TAHUN 4</small><h2>❄️ MISI PENJAGA BUMI ❄️</h2>'+
- '<p>Ayuh jelajah Zaman Air Batu! Pecahkan kristal ais yang mengandungi jawapan betul untuk memperoleh markah. Bersediakah kamu?</p>'+
+ '<small>'+esc(cfg.subtitle)+'</small><h2>❄️ '+esc(cfg.title)+' ❄️</h2>'+
+ '<p>'+esc(cfg.intro)+'</p>'+
  '<div class="ninja-howto"><div><span>✋</span> Buka tapak tangan dan halakan ke jawapan.</div>'+
  '<div><span>🔒</span> Tahan selama seketika untuk mengunci sasaran.</div>'+
  '<div><span>✊</span> Genggam tangan untuk memecahkan ais!</div></div>'+
@@ -131,9 +132,8 @@ function nextQuestion(){
  '<div class="ninja-progress"><div class="ninja-progress-fill" style="width:'+scorePercent+'%"></div></div>'+
  '<div class="ninja-question"><small>SOALAN '+(questionIndex+1)+' / '+questions.length+' · PILIH JAWAPAN BETUL</small><h2>'+esc(q.q)+'</h2></div>'+
  '<div class="ninja-arena" role="group" aria-label="Empat pilihan jawapan">'+
- currentSet.map((answerIndex,i)=>'<button type="button" class="ninja-target" data-ninja-answer="'+i+'" aria-label="Jawapan '+(i+1)+': '+esc(q.answers[answerIndex][1])+'">'+
- '<span class="ninja-emoji" aria-hidden="true">'+q.answers[answerIndex][0]+'</span>'+
- '<span class="ninja-label">'+esc(q.answers[answerIndex][1])+'</span></button>').join("")+
+ currentSet.map((answerIndex,i)=>'<button type="button" class="ninja-target" data-ninja-answer="'+i+'" aria-label="Jawapan '+(i+1)+': '+esc(Array.isArray(q.answers[answerIndex])?q.answers[answerIndex][1]:q.answers[answerIndex]?.text||"Gambar jawapan")+'">'+
+ answerHTML(q.answers[answerIndex])+'</button>').join("")+
  '<span class="ninja-cursor" aria-hidden="true">✋</span></div>'+
  '<p class="ninja-feedback" role="status" aria-live="polite">✋ Gerakkan tapak tangan ke kristal, tunggu sehingga terkunci, kemudian ✊ genggam untuk memecahkan!</p>'+
  '<div id="ninjaTracking" class="ninja-tracker" role="status" aria-live="polite">📷 Tekan Kamera Gestur, kemudian gerakkan tangan untuk mengawal penunjuk ✋.</div><div class="ninja-guide">📸 Kamera diproses pada peranti sahaja. <b>Tiada kamera?</b> Klik kristal jawapan kemudian tekan PECAHKAN AIS.</div>'+
@@ -145,6 +145,7 @@ function nextQuestion(){
  mount.querySelector("#ninjaSmash").onclick=()=>{if(locked>=0)submitChoice(locked);else status("👉 Pilih kristal jawapan dahulu, kemudian tekan PECAHKAN AIS.");};
  mount.querySelector("#ninjaCamera").onclick=startCamera;
  mount.querySelector("#ninjaRestart").onclick=showIntro;
+ window.IceBookMedia?.hydrate?.(mount);
 }
 function displayTarget(index,ratio){
  const targets=[...mount.querySelectorAll(".ninja-target")];
@@ -187,7 +188,7 @@ function submitChoice(slot){
  const q=currentQuestion,optionIndex=currentSet[slot],button=mount.querySelector('.ninja-target[data-ninja-answer="'+slot+'"]');
  const correct=optionIndex===q.correct;
  if(correct){
-  const gained=10;
+  const gained=Math.max(1,Math.min(100,Number(q.points)||10));
   points+=gained;correctAnswers++;combo++;
   button?.classList.add("ninja-broken");createShards(button);
   status("✅ SYABAS! +"+gained+" MARKAH ❄️ "+q.explain);
@@ -206,13 +207,13 @@ function submitChoice(slot){
  }
 }
 function showFinish(){
- clearTimers();mode="finish";pending=false;
+ clearTimers();mode="finish";pending=false;const cfg=config();
  shell('<div class="ninja-finish"><div class="ninja-mascot">🏆🦣❄️</div>'+
- '<h2>TAHNIAH, PENJAGA BUMI!</h2>'+
+ '<h2>'+esc(cfg.finishTitle)+'</h2>'+
  '<p>Kamu berjaya melengkapkan semua misi Zaman Air Batu!</p>'+
- '<div class="ninja-stats"><span class="ninja-stat">⭐ Jumlah markah <strong>'+points+' / '+questions.length*10+'</strong></span>'+
+ '<div class="ninja-stats"><span class="ninja-stat">⭐ Jumlah markah <strong>'+points+' / '+questions.reduce((sum,q)=>sum+Math.max(1,Math.min(100,Number(q.points)||10)),0)+'</strong></span>'+
  '<span class="ninja-stat">✅ Jawapan betul <strong>'+correctAnswers+' / '+questions.length+'</strong></span></div>'+
- '<p>Teruskan meneroka sejarah, menjaga alam dan belajar daripada bukti masa lalu.</p>'+
+ '<p>'+esc(cfg.finishMessage)+'</p>'+
  '<div class="ninja-bottom"><button id="ninjaAgain">↻ MAIN SEMULA</button><button id="ninjaBack" class="secondary">📚 Kembali ke Rak Buku</button></div></div>');
  mount.querySelector("#ninjaAgain").onclick=startGame;
  mount.querySelector("#ninjaBack").onclick=()=>window.home?.();
