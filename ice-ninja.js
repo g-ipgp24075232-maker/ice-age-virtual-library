@@ -6,16 +6,16 @@
 const ID="b6";
 const isGameBook=b=>!!b&&(b.id===ID||String(b.title||"").trim().toUpperCase()==="MISI PENJAGA BUMI");
 const defaultQuestions=[
- {q:"Buah apakah yang dihasilkan oleh pokok oak?",answers:[["🌰","Buah oak (acorn)"],["🦣","Mamot"],["🧊","Ais"],["🪨","Batu"]],correct:0,explain:"Buah oak dikenali sebagai acorn. Pokok oak tumbuh di sesetengah kawasan beriklim sederhana."},
- {q:"Apakah haiwan besar yang terkenal hidup pada Zaman Air Batu?",answers:[["🐟","Ikan"],["🦣","Mamot berbulu"],["🌰","Acorn"],["🪨","Batu"]],correct:1,explain:"Mamot berbulu mempunyai bulu tebal yang membantu menyesuaikan diri dengan persekitaran sejuk."},
- {q:"Apakah yang berlaku apabila ais daratan mencair dalam jumlah besar?",answers:[["🪨","Batu bertambah"],["🌰","Acorn membeku"],["🌊","Paras laut naik"],["🐅","Harimau bertambah"]],correct:2,explain:"Air daripada ais daratan yang mencair boleh mengalir ke laut dan menaikkan paras air laut."},
- {q:"Antara berikut, yang manakah tempat perlindungan manusia prasejarah?",answers:[["❄️","Kepingan salji"],["🐟","Ikan"],["🦣","Mamot"],["🏔️","Gua"]],correct:3,explain:"Sesetengah manusia prasejarah berlindung di gua, bergantung pada tempat dan zaman."},
- {q:"Apakah bukti yang boleh membantu ahli sains mengkaji haiwan purba?",answers:[["🦴","Fosil"],["🌊","Ombak"],["❄️","Salji"],["🌰","Acorn"]],correct:0,explain:"Fosil memberi maklumat tentang haiwan dan tumbuhan yang pernah hidup pada masa dahulu."},
- {q:"Apakah yang boleh digunakan oleh manusia prasejarah untuk membuat alat?",answers:[["🐅","Harimau"],["🪨","Batu"],["❄️","Salji"],["🐟","Ikan"]],correct:1,explain:"Manusia prasejarah menggunakan batu untuk menghasilkan pelbagai alat."},
- {q:"Apakah nama kawasan daratan luas yang pernah menghubungkan sebahagian Asia Tenggara ketika paras laut rendah?",answers:[["🐅","Habitat harimau"],["🌰","Hutan oak"],["🗺️","Pentas Sunda"],["🦴","Tapak fosil"]],correct:2,explain:"Pentas Sunda pernah terdedah lebih luas apabila paras laut lebih rendah semasa tempoh glasier."},
- {q:"Apakah keadaan suhu dunia ketika tempoh glasier Zaman Air Batu?",answers:[["🌊","Semua laut kering"],["🐟","Semua ikan pupus"],["🌰","Semua pokok menjadi oak"],["❄️","Lebih sejuk"]],correct:3,explain:"Suhu dunia secara purata lebih sejuk semasa tempoh glasier, tetapi bukan seluruh Bumi dilitupi ais."},
- {q:"Apakah yang membantu manusia prasejarah memanaskan badan dan memasak makanan?",answers:[["🔥","Api"],["🧊","Ais"],["🌊","Air laut"],["🪨","Batu mentah"]],correct:0,explain:"Penggunaan api membantu menyediakan haba dan memasak makanan."},
- {q:"Apakah kesan kenaikan paras laut terhadap daratan rendah di Asia Tenggara?",answers:[["🌰","Buah oak bertambah"],["🌊","Sebahagian daratan ditenggelami air"],["🦣","Semua mamot berhijrah ke Malaysia"],["❄️","Laut menjadi glasier"]],correct:1,explain:"Kenaikan paras laut telah menenggelamkan sebahagian kawasan rendah Pentas Sunda."}
+ {q:"Buah apakah yang dihasilkan oleh pokok oak?",answers:[["","Buah oak (acorn)"],["","Mamot"],["","Ais"],["","Batu"]],correct:0,explain:"Buah oak dikenali sebagai acorn. Pokok oak tumbuh di sesetengah kawasan beriklim sederhana."},
+ {q:"Apakah haiwan besar yang terkenal hidup pada Zaman Air Batu?",answers:[["","Ikan"],["","Mamot berbulu"],["","Acorn"],["","Batu"]],correct:1,explain:"Mamot berbulu mempunyai bulu tebal yang membantu menyesuaikan diri dengan persekitaran sejuk."},
+ {q:"Apakah yang berlaku apabila ais daratan mencair dalam jumlah besar?",answers:[["","Batu bertambah"],["","Acorn membeku"],["","Paras laut naik"],["","Harimau bertambah"]],correct:2,explain:"Air daripada ais daratan yang mencair boleh mengalir ke laut dan menaikkan paras air laut."},
+ {q:"Antara berikut, yang manakah tempat perlindungan manusia prasejarah?",answers:[["","Kepingan salji"],["","Ikan"],["","Mamot"],["","Gua"]],correct:3,explain:"Sesetengah manusia prasejarah berlindung di gua, bergantung pada tempat dan zaman."},
+ {q:"Apakah bukti yang boleh membantu ahli sains mengkaji haiwan purba?",answers:[["","Fosil"],["","Ombak"],["","Salji"],["","Acorn"]],correct:0,explain:"Fosil memberi maklumat tentang haiwan dan tumbuhan yang pernah hidup pada masa dahulu."},
+ {q:"Apakah yang boleh digunakan oleh manusia prasejarah untuk membuat alat?",answers:[["","Harimau"],["","Batu"],["","Salji"],["","Ikan"]],correct:1,explain:"Manusia prasejarah menggunakan batu untuk menghasilkan pelbagai alat."},
+ {q:"Apakah nama kawasan daratan luas yang pernah menghubungkan sebahagian Asia Tenggara ketika paras laut rendah?",answers:[["","Habitat harimau"],["","Hutan oak"],["","Pentas Sunda"],["","Tapak fosil"]],correct:2,explain:"Pentas Sunda pernah terdedah lebih luas apabila paras laut lebih rendah semasa tempoh glasier."},
+ {q:"Apakah keadaan suhu dunia ketika tempoh glasier Zaman Air Batu?",answers:[["","Semua laut kering"],["","Semua ikan pupus"],["","Semua pokok menjadi oak"],["","Lebih sejuk"]],correct:3,explain:"Suhu dunia secara purata lebih sejuk semasa tempoh glasier, tetapi bukan seluruh Bumi dilitupi ais."},
+ {q:"Apakah yang membantu manusia prasejarah memanaskan badan dan memasak makanan?",answers:[["","Api"],["","Ais"],["","Air laut"],["","Batu mentah"]],correct:0,explain:"Penggunaan api membantu menyediakan haba dan memasak makanan."},
+ {q:"Apakah kesan kenaikan paras laut terhadap daratan rendah di Asia Tenggara?",answers:[["","Buah oak bertambah"],["","Sebahagian daratan ditenggelami air"],["","Semua mamot berhijrah ke Malaysia"],["","Laut menjadi glasier"]],correct:1,explain:"Kenaikan paras laut telah menenggelamkan sebahagian kawasan rendah Pentas Sunda."}
 ];
 
 function getDefaultConfig(){
@@ -59,12 +59,11 @@ function theme(stage){
  withImage(cfg.assets.cursorImage,url=>{if(box.isConnected){box.style.setProperty("--ninja-cursor-url",'url("'+url.replace(/["\\]/g,"")+'")');box.classList.add("ninja-has-custom-cursor");}});
 }
 function answerHTML(answer){
- const a=Array.isArray(answer)?{emoji:answer[0],text:answer[1]}:answer||{};
+ const a=Array.isArray(answer)?{text:answer[1]}:answer||{};
  const photo=a.image||{},url=imageValid(photo.url)?photo.url:"";
  const hasPicture=!!(url||photo.mediaId);
- return (hasPicture?'<img class="ninja-answer-photo" alt="'+esc(a.text||"Gambar jawapan")+'" src="'+esc(url||photo.url||"")+'" '+(photo.mediaId?'data-book-media-id="'+esc(photo.mediaId)+'" data-book-media-path="'+esc(photo.url||"")+'"':'')+'>':
- '<span class="ninja-emoji" aria-hidden="true">'+esc(a.emoji||"❄️")+'</span>')+
- (a.text?'<span class="ninja-label">'+esc(a.text)+'</span>':'');
+ return (hasPicture?'<img class="ninja-answer-photo" alt="'+esc(a.text||"Gambar jawapan")+'" src="'+esc(url||photo.url||"")+'" '+(photo.mediaId?'data-book-media-id="'+esc(photo.mediaId)+'" data-book-media-path="'+esc(photo.url||"")+'"':'')+'>':'')+
+ '<span class="ninja-label">'+esc(a.text||(!hasPicture?"Pilihan jawapan":""))+'</span>';
 }
 const mount=document.createElement("section");mount.id="iceNinjaMount";mount.hidden=true;mount.setAttribute("aria-label","Permainan Misi Penjaga Bumi");
 document.getElementById("reader")?.querySelector(".reader-head")?.insertAdjacentElement("afterend",mount);
@@ -95,21 +94,21 @@ function shell(inner){
  theme(mode);
 }
 function topStats(){
- return '<div class="ninja-top"><div class="ninja-brand"><span class="ninja-top-icon">🦣</span> '+esc(config().title)+' <span class="ninja-top-icon">❄️</span></div>'+
- '<div class="ninja-stats"><span class="ninja-stat">⭐ Markah <strong id="ninjaScore">'+points+'</strong></span>'+
- '<span class="ninja-stat">🏆 Betul <strong id="ninjaCorrect">'+correctAnswers+'</strong></span>'+
- '<span class="ninja-stat">📖 <strong>'+(questionIndex+1)+'</strong> / '+questions.length+'</span></div></div>';
+ return '<div class="ninja-top"><div class="ninja-brand"><span class="ninja-top-mark"></span> '+esc(config().title)+' <span class="ninja-top-mark"></span></div>'+
+ '<div class="ninja-stats"><span class="ninja-stat"> Markah <strong id="ninjaScore">'+points+'</strong></span>'+
+ '<span class="ninja-stat"> Betul <strong id="ninjaCorrect">'+correctAnswers+'</strong></span>'+
+ '<span class="ninja-stat"> <strong>'+(questionIndex+1)+'</strong> / '+questions.length+'</span></div></div>';
 }
 function showIntro(){
  mode="intro";resetHand();const cfg=config();
- shell('<div class="ninja-start"><div class="ninja-mascot">🦣❄️</div>'+
- '<small>'+esc(cfg.subtitle)+'</small><h2>❄️ '+esc(cfg.title)+' ❄️</h2>'+
+ shell('<div class="ninja-start"><div class="ninja-ice-crest"></div>'+
+ '<small>'+esc(cfg.subtitle)+'</small><h2> '+esc(cfg.title)+' </h2>'+
  '<p>'+esc(cfg.intro)+'</p>'+
- '<div class="ninja-howto"><div><span>✋</span> Buka tapak tangan dan halakan ke jawapan.</div>'+
- '<div><span>🔒</span> Tahan selama seketika untuk mengunci sasaran.</div>'+
- '<div><span>✊</span> Genggam tangan untuk memecahkan ais!</div></div>'+
+ '<div class="ninja-howto"><div><span></span> Buka tapak tangan dan halakan ke jawapan.</div>'+
+ '<div><span></span> Tahan selama seketika untuk mengunci sasaran.</div>'+
+ '<div><span></span> Genggam tangan untuk memecahkan ais!</div></div>'+
  '<p>Jika tiada kamera, klik jawapan kemudian tekan <b>PECAHKAN AIS</b>. Soalan dipelajari secara santai, tanpa had masa.</p>'+
- '<div class="ninja-bottom"><button id="ninjaBegin">🎮 MULA MISI</button><button id="ninjaCamera" class="secondary">📷 Aktifkan Kamera Gestur</button></div></div>');
+ '<div class="ninja-bottom"><button id="ninjaBegin"> MULA MISI</button><button id="ninjaCamera" class="secondary"> Aktifkan Kamera Gestur</button></div></div>');
  mount.querySelector("#ninjaBegin").onclick=startGame;
  mount.querySelector("#ninjaCamera").onclick=startCamera;
 }
@@ -135,15 +134,15 @@ function nextQuestion(){
  '<div class="ninja-arena" role="group" aria-label="Empat pilihan jawapan">'+
  currentSet.map((answerIndex,i)=>'<button type="button" class="ninja-target" data-ninja-answer="'+i+'" aria-label="Jawapan '+(i+1)+': '+esc(Array.isArray(q.answers[answerIndex])?q.answers[answerIndex][1]:q.answers[answerIndex]?.text||"Gambar jawapan")+'">'+
  answerHTML(q.answers[answerIndex])+'</button>').join("")+
- '<span class="ninja-cursor" aria-hidden="true">✋</span></div>'+
- '<p class="ninja-feedback" role="status" aria-live="polite">✋ Gerakkan tapak tangan ke kristal, tunggu sehingga terkunci, kemudian ✊ genggam untuk memecahkan!</p>'+
- '<div id="ninjaTracking" class="ninja-tracker" role="status" aria-live="polite">📷 Tekan Kamera Gestur, kemudian gerakkan tangan untuk mengawal penunjuk ✋.</div><div class="ninja-guide">📸 Kamera diproses pada peranti sahaja. <b>Tiada kamera?</b> Klik kristal jawapan kemudian tekan PECAHKAN AIS.</div>'+
- '<div class="ninja-bottom"><button id="ninjaSmash">💥 PECAHKAN AIS</button><button id="ninjaCamera" class="secondary">✋ Kamera Gestur</button>'+
+ '<span class="ninja-cursor" aria-hidden="true"></span></div>'+
+ '<p class="ninja-feedback" role="status" aria-live="polite"> Gerakkan tapak tangan ke kristal, tunggu sehingga terkunci, kemudian  genggam untuk memecahkan!</p>'+
+ '<div id="ninjaTracking" class="ninja-tracker" role="status" aria-live="polite"> Tekan Kamera Gestur, kemudian gerakkan tangan untuk mengawal penunjuk .</div><div class="ninja-guide"> Kamera diproses pada peranti sahaja. <b>Tiada kamera?</b> Klik kristal jawapan kemudian tekan PECAHKAN AIS.</div>'+
+ '<div class="ninja-bottom"><button id="ninjaSmash"> PECAHKAN AIS</button><button id="ninjaCamera" class="secondary"> Kamera Gestur</button>'+
  '<button id="ninjaRestart" class="secondary">↻ Mula Semula</button></div>');
  for(const button of mount.querySelectorAll(".ninja-target")){
   button.addEventListener("click",()=>lockChoice(Number(button.dataset.ninjaAnswer),"mouse"));
  }
- mount.querySelector("#ninjaSmash").onclick=()=>{if(locked>=0)submitChoice(locked);else status("👉 Pilih kristal jawapan dahulu, kemudian tekan PECAHKAN AIS.");};
+ mount.querySelector("#ninjaSmash").onclick=()=>{if(locked>=0)submitChoice(locked);else status(" Pilih kristal jawapan dahulu, kemudian tekan PECAHKAN AIS.");};
  mount.querySelector("#ninjaCamera").onclick=startCamera;
  mount.querySelector("#ninjaRestart").onclick=showIntro;
  window.IceBookMedia?.hydrate?.(mount);
@@ -158,7 +157,7 @@ function displayTarget(index,ratio){
    const meter=document.createElement("span");meter.className="ninja-lock-meter";meter.textContent=Math.min(100,Math.round(ratio*100))+"%";button.append(meter);
   }
   if(i===locked){
-   const marker=document.createElement("span");marker.className="ninja-lock-meter";marker.textContent="🔒";button.append(marker);
+   const marker=document.createElement("span");marker.className="ninja-lock-meter";marker.textContent="";button.append(marker);
   }
  });
 }
@@ -166,7 +165,7 @@ function lockChoice(i,input){
  if(!isActive()||i<0||i>3)return;
  locked=i;selected=i;hovered=i;hoverSince=0;
  displayTarget(i,1);
- status(input==="mouse"?"🔒 Sasaran dipilih. Tekan PECAHKAN AIS untuk menjawab.":"🔒 Sasaran terkunci! Genggam tangan ✊ untuk memecahkan ais.");
+ status(input==="mouse"?" Sasaran dipilih. Tekan PECAHKAN AIS untuk menjawab.":" Sasaran terkunci! Genggam tangan  untuk memecahkan ais.");
 }
 function createShards(button){
  if(!button)return;
@@ -221,7 +220,7 @@ function submitChoice(slot){
   const gained=Math.max(1,Math.min(100,Number(q.points)||10));
   points+=gained;correctAnswers++;combo++;
   createShards(button);
-  status("✅ SYABAS! +"+gained+" MARKAH ❄️ "+q.explain);
+  status(" SYABAS! +"+gained+" MARKAH  "+q.explain);
   const score=mount.querySelector("#ninjaScore");if(score)score.textContent=points;
   const count=mount.querySelector("#ninjaCorrect");if(count)count.textContent=correctAnswers;
   transitionTimer=setTimeout(()=>{questionIndex++;nextQuestion();},2100);
@@ -230,11 +229,11 @@ function submitChoice(slot){
   if(!wrongLog.has(questionIndex))wrongLog.set(questionIndex,new Set());
   wrongLog.get(questionIndex).add(optionIndex);
   button?.classList.add("ninja-wrong");
-  status("💙 Belum tepat! Cuba sasaran yang lain. Tiada markah ditolak.");
+  status(" Belum tepat! Cuba sasaran yang lain. Tiada markah ditolak.");
   transitionTimer=setTimeout(()=>{
    pending=false;resetHand();displayTarget(-1,0);
    button?.classList.remove("ninja-wrong");
-   status("✋ Cari jawapan yang betul dan cuba sekali lagi.");
+   status(" Cari jawapan yang betul dan cuba sekali lagi.");
   },1050);
  }
 }
@@ -307,7 +306,7 @@ function showFinish(){
 }
 function startCamera(){
  const camera=window.IceGesture;
- if(!camera){status("⚠️ Modul kamera tidak tersedia. Klik jawapan menggunakan tetikus atau sentuhan.");return;}
+ if(!camera){status(" Modul kamera tidak tersedia. Klik jawapan menggunakan tetikus atau sentuhan.");return;}
  camera.show?.();
  if(camera.isActive?.())return;
  camera.start?.();
@@ -324,7 +323,7 @@ function onHandLost(){
  if(performance.now()-lastHandAt<270)return; // tolerate a couple dropped frames
  const cur=mount.querySelector(".ninja-cursor");
  cur?.classList.remove("visible");
- handNoticeUpdate("📷 Tangan belum dikesan. Letakkan seluruh tapak tangan dalam kamera dan pastikan pencahayaan mencukupi.");
+ handNoticeUpdate(" Tangan belum dikesan. Letakkan seluruh tapak tangan dalam kamera dan pastikan pencahayaan mencukupi.");
  hovered=-1;hoverSince=0;fistSince=0;smoothX=null;smoothY=null;
  if(locked<0)displayTarget(-1,0);
 }
@@ -370,14 +369,14 @@ function handleHand(points,now,mirrored){
  const cursor=mount.querySelector(".ninja-cursor");
  if(cursor){
   cursor.classList.add("visible");
-  cursor.textContent=pose.fist?"✊":"✋";
+  cursor.textContent=pose.fist?"GENGGAM":"TAPAK";
   cursor.style.left=(smoothX*100)+"%";
   cursor.style.top=(smoothY*100)+"%";
   cursor.dataset.pose=pose.fist?"fist":pose.open?"palm":"tracking";
  }
  const hit=handTargetAt(smoothX,smoothY);
  if(pose.fist){
-  handNoticeUpdate("✊ Genggaman dikesan. "+(locked>=0?"Pecahkan kristal terkunci!":"Buka tapak tangan dan kunci jawapan dahulu."));
+  handNoticeUpdate(" Genggaman dikesan. "+(locked>=0?"Pecahkan kristal terkunci!":"Buka tapak tangan dan kunci jawapan dahulu."));
   if(locked>=0&&armed){
    if(!fistSince)fistSince=now;
    if(now-fistSince>=145){armed=false;submitChoice(locked);}
@@ -387,14 +386,14 @@ function handleHand(points,now,mirrored){
  fistSince=0;
  if(!pose.open){
   // Critical: NEVER freeze the cursor when fingers are partially curled.
-  handNoticeUpdate("✋ Tangan dikesan dan penunjuk bergerak. Buka sekurang-kurangnya 3 jari untuk mengunci kristal.");
+  handNoticeUpdate(" Tangan dikesan dan penunjuk bergerak. Buka sekurang-kurangnya 3 jari untuk mengunci kristal.");
   if(locked<0){hovered=-1;hoverSince=0;displayTarget(-1,0);}
   return;
  }
  armed=true;
- handNoticeUpdate(locked>=0?"🔒 Kristal terkunci! Genggam tangan ✊ untuk memecahkannya.":
-  hit>=0?"✋ Tapak tangan dikesan — tahan di atas kristal untuk mengunci.":
-  "✋ Tapak tangan dikesan — gerakkan tangan ke atas satu kristal ais.");
+ handNoticeUpdate(locked>=0?" Kristal terkunci! Genggam tangan  untuk memecahkannya.":
+  hit>=0?" Tapak tangan dikesan — tahan di atas kristal untuk mengunci.":
+  " Tapak tangan dikesan — gerakkan tangan ke atas satu kristal ais.");
  if(locked>=0){
   // Keep tracking even while locked. Moving deliberately to another crystal
   // clears the old lock so children can correct their aim before smashing.
