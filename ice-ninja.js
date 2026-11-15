@@ -218,6 +218,6 @@ function handleHand(points,now,mirrored){
   if(now-fistSince>=175){armed=false;submitChoice(locked);}
  }
 }
-window.IceNinja={isGameBook,enter,exit,isActive,handleHand,onHandLost,
+window.IceNinja={isGameBook,enter,exit,isActive,isInGame:()=>active,handleHand,onHandLost,
  version:"ice-age-ninja-gesture-game-v1"};
 })();
