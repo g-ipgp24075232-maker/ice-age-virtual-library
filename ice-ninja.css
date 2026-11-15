@@ -88,3 +88,14 @@ body.ice-ninja-active #gesturePanel video{max-height:130px}
 .ninja-cursor{z-index:25!important;font-size:3.3rem!important;filter:drop-shadow(0 0 8px #fffbd9) drop-shadow(0 4px 5px #164471)!important;will-change:left,top;transition:left .055s linear,top .055s linear!important}
 .ninja-cursor.visible{display:block!important}
 .ninja-cursor[data-pose=tracking]{opacity:.75}
+
+/* Custom art from Guru, applied exclusively to the sixth-book game. */
+#iceNinjaMount .ninja-game{border-color:var(--ninja-primary,#caeff3)}
+#iceNinjaMount .ninja-target{
+ background-image:var(--ninja-answer-bg,radial-gradient(ellipse at 34% 22%,#fefeffee 0 8%,#b3eaf5e0 19%,var(--ninja-crystal,#77b8d8) 65%,#2786b6 95%));
+ background-position:center;background-size:cover;background-repeat:no-repeat
+}
+#iceNinjaMount .ninja-answer-photo{width:min(105px,65%);height:84px;object-fit:contain;display:block;margin:0 auto 4px;filter:drop-shadow(0 3px 4px #145c7b58);border-radius:9px}
+#iceNinjaMount .ninja-cursor{background-image:var(--ninja-cursor-url,none);background-size:contain;background-repeat:no-repeat;background-position:center;min-width:52px;min-height:52px}
+#iceNinjaMount .ninja-cursor:has(+ .none){visibility:visible}
+@media(max-width:650px){#iceNinjaMount .ninja-answer-photo{height:59px;width:min(80px,70%)}}
