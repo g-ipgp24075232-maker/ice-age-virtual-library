@@ -186,3 +186,71 @@ body.ice-ninja-active #gesturePanel video{max-height:130px}
  #iceNinjaMount .ninja-review-choice{min-height:86px}
  #iceNinjaMount .ninja-fragment .ninja-answer-photo{height:60px}
 }
+
+/* Book six answer crystals: sculpted glacial ice v2. Only these answer tiles. */
+#iceNinjaMount .ninja-arena > .ninja-target{
+  /* 15 uneven mineral-like facets: no smooth rectangle or oval */
+  border:0;
+  border-radius:0;
+  padding:17px 16px 20px;
+  clip-path:polygon(
+    12% 2%,33% 0%,57% 4%,79% 0%,96% 14%,100% 34%,
+    95% 52%,100% 76%,86% 96%,60% 100%,43% 96%,18% 100%,
+    3% 82%,0% 57%,5% 29%
+  );
+  /* Crystal translucence, cold core, and many overlapping facets.
+     The last layer still honours the Guru-uploaded ice-card artwork. */
+  background-image:
+    linear-gradient(135deg,rgba(255,255,255,.72) 0%,rgba(236,253,255,.13) 22%,rgba(29,125,185,.07) 57%,rgba(6,66,130,.32) 100%),
+    conic-gradient(from 26deg at 53% 44%,rgba(242,255,255,.55) 0deg,rgba(40,146,197,.1) 52deg,rgba(253,255,255,.51) 112deg,rgba(34,103,174,.28) 176deg,rgba(255,255,255,.45) 243deg,rgba(73,166,215,.18) 306deg,rgba(242,255,255,.55) 360deg),
+    var(--ninja-answer-bg,linear-gradient(152deg,#faffff 0%,#d2f6ff 17%,#97dbf3 40%,#5aabd5 70%,#246baf 100%));
+  background-size:cover;
+  background-position:center;
+  box-shadow:inset 0 0 16px rgba(255,255,255,.76);
+  filter:drop-shadow(0 3px 1px rgba(190,245,255,.65)) drop-shadow(0 11px 10px rgba(3,39,79,.45));
+  isolation:isolate;
+}
+#iceNinjaMount .ninja-arena > .ninja-target::before{
+  content:"";
+  position:absolute;inset:0;
+  pointer-events:none;z-index:0;
+  background:
+    linear-gradient(116deg,rgba(255,255,255,.92),rgba(224,252,255,.05) 64%) 6% 3% / 55% 45% no-repeat,
+    linear-gradient(310deg,rgba(220,251,255,.80),rgba(66,164,214,.06)) 85% 2% / 37% 71% no-repeat,
+    linear-gradient(39deg,rgba(5,75,140,.40),rgba(248,255,255,.05)) 0% 92% / 67% 38% no-repeat,
+    linear-gradient(121deg,transparent 47%,rgba(240,255,255,.75) 48%,transparent 50%) center / 100% 100% no-repeat;
+  clip-path:polygon(6% 10%,35% 2%,60% 7%,92% 13%,96% 43%,72% 89%,31% 98%,5% 76%);
+  opacity:.9;
+}
+#iceNinjaMount .ninja-arena > .ninja-target::after{
+  content:"";
+  position:absolute;inset:0;
+  pointer-events:none;z-index:0;
+  background:
+    linear-gradient(164deg,rgba(255,255,255,.9) 0%,rgba(255,255,255,.06) 80%) 7% 5%/37% 31% no-repeat,
+    linear-gradient(23deg,rgba(238,255,255,.87),rgba(19,94,159,.05) 82%) 79% 67%/32% 35% no-repeat,
+    linear-gradient(61deg,transparent 39%,rgba(234,252,255,.45) 40%,transparent 42%) center/100% 100% no-repeat;
+  opacity:.76;
+}
+#iceNinjaMount .ninja-arena > .ninja-target > .ninja-label,
+#iceNinjaMount .ninja-arena > .ninja-target > .ninja-answer-photo{
+  position:relative;z-index:2;
+  text-shadow:0 1px 1px rgba(248,255,255,.72);
+}
+/* Ice shards inherit the same faceted surface. Their per-piece inline
+   clip-path from the existing shatter animation remains untouched. */
+#iceNinjaMount .ninja-arena > .ninja-fragment{
+  border-radius:0;
+  background-image:
+    linear-gradient(135deg,rgba(255,255,255,.60),rgba(33,125,185,.15)),
+    var(--ninja-answer-bg,linear-gradient(152deg,#faffff,#9dddf4 38%,#4c9dc9 78%,#246baf));
+}
+#iceNinjaMount .ninja-arena > .ninja-target.ninja-locked{
+  filter:brightness(1.13) drop-shadow(0 0 10px rgba(255,245,188,.88));
+}
+#iceNinjaMount .ninja-arena > .ninja-target.ninja-wrong{
+  background-image:linear-gradient(150deg,#fff7fb,#efb0b9 48%,#b45477);
+}
+@media(max-width:650px){
+  #iceNinjaMount .ninja-arena > .ninja-target{padding:11px 9px 14px;}
+}
