@@ -170,18 +170,47 @@ function lockChoice(i,input){
 }
 function createShards(button){
  if(!button)return;
- const arena=area(),rect=button.getBoundingClientRect(),parent=arena.getBoundingClientRect();
- const x=rect.left-parent.left+rect.width/2,y=rect.top-parent.top+rect.height/2;
- const symbols=["❄️","✦","💎","✧","❅","✦","🧊","✧"];
- symbols.forEach((symbol,i)=>{
-  const element=document.createElement("span");element.className="ninja-spark";element.textContent=symbol;
-  element.style.left=x+"px";element.style.top=y+"px";
-  const angle=i/8*Math.PI*2;
-  element.style.setProperty("--dx",Math.round(Math.cos(angle)*(85+i*5))+"px");
-  element.style.setProperty("--dy",Math.round(Math.sin(angle)*(75+i*4))+"px");
-  element.style.setProperty("--rot",(i%2?-170:180)+"deg");
-  arena.append(element);setTimeout(()=>element.remove(),850);
- });
+ const arena=area(),card=button.getBoundingClientRect(),frame=arena?.getBoundingClientRect();
+ if(!arena||!frame)return;
+ const x=card.left-frame.left,y=card.top-frame.top,w=card.width,h=card.height;
+ const xs=[0,34,67,100],ys=[0,33,69,100];
+ const angles=[-36,17,-12,24,-21,31,-28,12,-15];
+ const pieces=[];
+ for(let row=0;row<3;row++)for(let col=0;col<3;col++){
+  const i=row*3+col;
+  const l=xs[col],r=xs[col+1],t=ys[row],b=ys[row+1];
+  const jitter=(i%3-1)*5;
+  const polygon='polygon('+
+   l+'% '+t+'%,'+((l+r)/2)+'% '+(t+6+jitter)+'%,'+r+'% '+t+'%,'+
+   (r+jitter)+'% '+((t+b)/2)+'%,'+r+'% '+b+'%,'+
+   ((l+r)/2)+'% '+(b-5)+'%,'+l+'% '+b+'%,'+
+   (l-jitter)+'% '+((t+b)/2)+'%)';
+  const fragment=button.cloneNode(true);
+  fragment.removeAttribute("data-ninja-answer");
+  fragment.removeAttribute("aria-label");
+  fragment.tabIndex=-1;fragment.disabled=true;
+  fragment.className="ninja-fragment";
+  fragment.setAttribute("aria-hidden","true");
+  fragment.style.left=x+"px";fragment.style.top=y+"px";
+  fragment.style.width=w+"px";fragment.style.height=h+"px";
+  fragment.style.clipPath=polygon;
+  fragment.style.setProperty("--dx",Math.round((col-1)*120+(i%2?30:-20))+"px");
+  fragment.style.setProperty("--dy",Math.round((row-1)*88-50+(i%2?-25:15))+"px");
+  fragment.style.setProperty("--spin",angles[i]+"deg");
+  fragment.style.setProperty("--delay",(i%4*32)+"ms");
+  arena.append(fragment);pieces.push(fragment);
+ }
+ const cracks=document.createElement("div");
+ cracks.className="ninja-crack-overlay";cracks.setAttribute("aria-hidden","true");
+ cracks.style.left=x+"px";cracks.style.top=y+"px";
+ cracks.style.width=w+"px";cracks.style.height=h+"px";
+ arena.append(cracks);
+ button.classList.add("ninja-impact");
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  pieces.forEach(piece=>piece.classList.add("ninja-fragment-fly"));
+ }));
+ setTimeout(()=>{button.style.visibility="hidden";cracks.remove();},220);
+ setTimeout(()=>pieces.forEach(piece=>piece.remove()),1400);
 }
 function submitChoice(slot){
  if(!isActive()||locked<0)return;
@@ -191,7 +220,7 @@ function submitChoice(slot){
  if(correct){
   const gained=Math.max(1,Math.min(100,Number(q.points)||10));
   points+=gained;correctAnswers++;combo++;
-  button?.classList.add("ninja-broken");createShards(button);
+  createShards(button);
   status("✅ SYABAS! +"+gained+" MARKAH ❄️ "+q.explain);
   const score=mount.querySelector("#ninjaScore");if(score)score.textContent=points;
   const count=mount.querySelector("#ninjaCorrect");if(count)count.textContent=correctAnswers;
