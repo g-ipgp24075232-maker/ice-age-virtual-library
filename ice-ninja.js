@@ -5,7 +5,7 @@
 "use strict";
 const ID="b6";
 const isGameBook=b=>!!b&&(b.id===ID||String(b.title||"").trim().toUpperCase()==="MISI PENJAGA BUMI");
-const questions=[
+const defaultQuestions=[
  {q:"Buah apakah yang dihasilkan oleh pokok oak?",answers:[["🌰","Buah oak (acorn)"],["🦣","Mamot"],["🧊","Ais"],["🪨","Batu"]],correct:0,explain:"Buah oak dikenali sebagai acorn. Pokok oak tumbuh di sesetengah kawasan beriklim sederhana."},
  {q:"Apakah haiwan besar yang terkenal hidup pada Zaman Air Batu?",answers:[["🐟","Ikan"],["🦣","Mamot berbulu"],["🌰","Acorn"],["🪨","Batu"]],correct:1,explain:"Mamot berbulu mempunyai bulu tebal yang membantu menyesuaikan diri dengan persekitaran sejuk."},
  {q:"Apakah yang berlaku apabila ais daratan mencair dalam jumlah besar?",answers:[["🪨","Batu bertambah"],["🌰","Acorn membeku"],["🌊","Paras laut naik"],["🐅","Harimau bertambah"]],correct:2,explain:"Air daripada ais daratan yang mencair boleh mengalir ke laut dan menaikkan paras air laut."},
@@ -17,6 +17,55 @@ const questions=[
  {q:"Apakah yang membantu manusia prasejarah memanaskan badan dan memasak makanan?",answers:[["🔥","Api"],["🧊","Ais"],["🌊","Air laut"],["🪨","Batu mentah"]],correct:0,explain:"Penggunaan api membantu menyediakan haba dan memasak makanan."},
  {q:"Apakah kesan kenaikan paras laut terhadap daratan rendah di Asia Tenggara?",answers:[["🌰","Buah oak bertambah"],["🌊","Sebahagian daratan ditenggelami air"],["🦣","Semua mamot berhijrah ke Malaysia"],["❄️","Laut menjadi glasier"]],correct:1,explain:"Kenaikan paras laut telah menenggelamkan sebahagian kawasan rendah Pentas Sunda."}
 ];
+
+function getDefaultConfig(){
+ return {
+  title:"MISI PENJAGA BUMI",subtitle:"PERMAINAN INTERAKTIF SEJARAH TAHUN 4",
+  intro:"Ayuh jelajah Zaman Air Batu! Pecahkan kristal ais yang mengandungi jawapan betul untuk memperoleh markah. Bersediakah kamu?",
+  finishTitle:"TAHNIAH, PENJAGA BUMI!",finishMessage:"Teruskan meneroka sejarah, menjaga alam dan belajar daripada bukti masa lalu.",
+  themeColor:"#caeff3",crystalColor:"#77b8d8",
+  assets:{background:{url:""},introBackground:{url:""},finishBackground:{url:""},answerBackground:{url:""},cursorImage:{url:""}},
+  questions:defaultQuestions.map(q=>({...q,points:10,answers:q.answers.map(([emoji,text])=>({emoji,text,image:{url:""}}))}))
+ };
+}
+function config(){
+ const b=window.IceSiteData?.getBooks?.()?.find(x=>isGameBook(x));
+ const def=getDefaultConfig(),saved=b?.gameConfig;
+ if(!saved||typeof saved!=="object")return def;
+ return {...def,...saved,assets:{...def.assets,...saved.assets},
+  questions:Array.isArray(saved.questions)&&saved.questions.length?saved.questions:def.questions};
+}
+const questions=new Proxy([],{
+ get(_target,property){
+  const value=config().questions;
+  const result=Reflect.get(value,property,value);
+  return typeof result==="function"?result.bind(value):result;
+ }
+});
+const imageValid=value=>/^(https:\/\/[^\s"'<>]+|(?:\.\/)?(?:art|media)\/[\w./%-]+|data:image\/(?:png|jpeg|gif|webp);base64,[A-Za-z0-9+/=]+)$/i.test(String(value||""));
+function withImage(asset,callback){
+ if(!asset)return;
+ if(imageValid(asset.url))callback(asset.url);
+ if(asset.mediaId)window.IceBookMedia?.getUrl?.(asset.mediaId).then(url=>{if(url)callback(url)}).catch(()=>{});
+}
+function theme(stage){
+ const cfg=config(),box=mount.querySelector(".ninja-game");if(!box)return;
+ box.style.setProperty("--ninja-primary",/^#[\da-f]{6}$/i.test(cfg.themeColor)?cfg.themeColor:"#caeff3");
+ box.style.setProperty("--ninja-crystal",/^#[\da-f]{6}$/i.test(cfg.crystalColor)?cfg.crystalColor:"#77b8d8");
+ const background=stage==="intro"?cfg.assets.introBackground:stage==="finish"?cfg.assets.finishBackground:cfg.assets.background;
+ const chosen=background?.url||background?.mediaId?background:cfg.assets.background;
+ withImage(chosen,url=>{if(box.isConnected)box.style.backgroundImage='linear-gradient(180deg,#0d3d6bcc,#2b739895),url("'+url.replace(/["\\]/g,"")+'")';});
+ withImage(cfg.assets.answerBackground,url=>{if(box.isConnected)box.style.setProperty("--ninja-answer-bg",'url("'+url.replace(/["\\]/g,"")+'")');});
+ withImage(cfg.assets.cursorImage,url=>{if(box.isConnected)box.style.setProperty("--ninja-cursor-url",'url("'+url.replace(/["\\]/g,"")+'")');});
+}
+function answerHTML(answer){
+ const a=Array.isArray(answer)?{emoji:answer[0],text:answer[1]}:answer||{};
+ const photo=a.image||{},url=imageValid(photo.url)?photo.url:"";
+ const hasPicture=!!(url||photo.mediaId);
+ return (hasPicture?'<img class="ninja-answer-photo" alt="'+esc(a.text||"Gambar jawapan")+'" src="'+esc(url||photo.url||"")+'" '+(photo.mediaId?'data-book-media-id="'+esc(photo.mediaId)+'" data-book-media-path="'+esc(photo.url||"")+'"':'')+'>':
+ '<span class="ninja-emoji" aria-hidden="true">'+esc(a.emoji||"❄️")+'</span>')+
+ (a.text?'<span class="ninja-label">'+esc(a.text)+'</span>':'');
+}
 const mount=document.createElement("section");mount.id="iceNinjaMount";mount.hidden=true;mount.setAttribute("aria-label","Permainan Misi Penjaga Bumi");
 document.getElementById("reader")?.querySelector(".reader-head")?.insertAdjacentElement("afterend",mount);
 let active=false,mode="intro",questionIndex=0,points=0,combo=0,correctAnswers=0,wrongAnswers=0,selected=-1,hovered=-1,hoverSince=0,locked=-1,fistSince=0,armed=true,pending=false;
@@ -273,6 +322,6 @@ function handleHand(points,now,mirrored){
  displayTarget(hit,ratio);
  if(ratio>=1)lockChoice(hit,"gesture");
 }
-window.IceNinja={isGameBook,enter,exit,isActive,isInGame:()=>active,handleHand,onHandLost,
+window.IceNinja={isGameBook,enter,exit,isActive,isInGame:()=>active,handleHand,onHandLost,getDefaultConfig,
  version:"ice-age-ninja-hand-pointer-fix-v2"};
 })();
