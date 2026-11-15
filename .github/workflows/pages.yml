@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -41,6 +43,29 @@ jobs:
           cp -R audio site/audio
           cp -R media site/media
           cp -R art site/art
+          # A teacher's exported ZIP contains published-content.json + media/.
+          # GitHub Upload files does not extract ZIPs. Deploy a package only
+          # when it was committed later than the standalone JSON file; direct
+          # JSON updates made after the ZIP will therefore keep taking priority.
+          PACKAGE="Ice-Age-Library-Publish-Package.zip"
+          if [[ -f "$PACKAGE" ]]; then
+            PACKAGE_TIME=$(git log -1 --format=%ct -- "$PACKAGE")
+            JSON_TIME=$(git log -1 --format=%ct -- published-content.json)
+            if (( PACKAGE_TIME > JSON_TIME )); then
+              echo "Deploying newer Guru export ZIP: $PACKAGE"
+              unzip -tq "$PACKAGE" >/dev/null
+              unzip -p "$PACKAGE" published-content.json | python3 -m json.tool >/dev/null
+              unzip -p "$PACKAGE" published-content.json > site/published-content.json
+              if unzip -Z1 "$PACKAGE" | grep -q '^media/'; then
+                unzip -oq "$PACKAGE" 'media/*' -d site/
+              fi
+              test -s site/published-content.json
+              echo "Package's published-content.json and media/ installed into site."
+            else
+              echo "Standalone published-content.json is newer; using repository file."
+            fi
+          fi
+          python3 -m json.tool site/published-content.json > /dev/null
           cp "$PKG/vision_bundle.mjs" site/vendor/mediapipe/vision_bundle.mjs
           cp -R "$PKG/wasm" site/vendor/mediapipe/
           curl --fail --location --retry 4 --retry-all-errors --connect-timeout 25 --max-time 180 \
