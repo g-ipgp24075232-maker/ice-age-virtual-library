@@ -56,7 +56,7 @@ function theme(stage){
  const chosen=background?.url||background?.mediaId?background:cfg.assets.background;
  withImage(chosen,url=>{if(box.isConnected)box.style.backgroundImage='linear-gradient(180deg,#0d3d6bcc,#2b739895),url("'+url.replace(/["\\]/g,"")+'")';});
  withImage(cfg.assets.answerBackground,url=>{if(box.isConnected)box.style.setProperty("--ninja-answer-bg",'url("'+url.replace(/["\\]/g,"")+'")');});
- withImage(cfg.assets.cursorImage,url=>{if(box.isConnected)box.style.setProperty("--ninja-cursor-url",'url("'+url.replace(/["\\]/g,"")+'")');});
+ withImage(cfg.assets.cursorImage,url=>{if(box.isConnected){box.style.setProperty("--ninja-cursor-url",'url("'+url.replace(/["\\]/g,"")+'")');box.classList.add("ninja-has-custom-cursor");}});
 }
 function answerHTML(answer){
  const a=Array.isArray(answer)?{emoji:answer[0],text:answer[1]}:answer||{};
