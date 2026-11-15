@@ -21,12 +21,12 @@ function changed(b,config){
 async function persist(b,config){
  if(timer)clearTimeout(timer);
  b.gameConfig=config;
- message("💾 Menyimpan draf permainan...");
+ message(" Menyimpan draf permainan...");
  try{
   const result=await window.IceSiteData?.saveBooksDraft?.();
-  message(result?"✅ Draf permainan disimpan. Eksport JSON / ZIP Media dan Commit untuk peranti lain.":"❌ Draf gagal disimpan. Semak storan pelayar.");
+  message(result?" Draf permainan disimpan. Eksport JSON / ZIP Media dan Commit untuk peranti lain.":" Draf gagal disimpan. Semak storan pelayar.");
   return result;
- }catch(err){message("❌ "+err.message);return false;}
+ }catch(err){message(" "+err.message);return false;}
 }
 function btn(parent,label,fn){
  const x=e("button",label);x.type="button";x.className="secondary";
@@ -56,26 +56,26 @@ function uploadBox(parent,label,asset,onSet,b,config){
  const picker=e("input");picker.type="file";picker.accept="image/*,.gif,.png,.jpg,.jpeg,.webp,.avif";block.append(picker);
  picker.addEventListener("change",async()=>{
   const file=picker.files?.[0];if(!file)return;
-  if(!file.type.startsWith("image/")&&!/\.(png|jpe?g|webp|gif|avif)$/i.test(file.name)){message("⚠️ Sila pilih gambar.");return;}
-  picker.disabled=true;message("📷 Menyimpan "+file.name+"...");
+  if(!file.type.startsWith("image/")&&!/\.(png|jpe?g|webp|gif|avif)$/i.test(file.name)){message(" Sila pilih gambar.");return;}
+  picker.disabled=true;message(" Menyimpan "+file.name+"...");
   try{
    const target={type:"image",url:current.url||"",mediaId:current.mediaId||"",mediaName:current.mediaName||""};
    onSet(target);b.gameConfig=config;
    await window.IceBookMedia.upload(file,target);
    current=target;onSet(target);
    link.value="";await previewImage();
-   message("✅ "+file.name+" telah disimpan. Foto akan dimasukkan dalam ZIP penerbitan.");
-  }catch(err){message("❌ Muat naik gagal: "+err.message);}
+   message(" "+file.name+" telah disimpan. Foto akan dimasukkan dalam ZIP penerbitan.");
+  }catch(err){message(" Muat naik gagal: "+err.message);}
   finally{picker.disabled=false;}
  });
  const link=field(block,"Pilihan lain: URL gambar (HTTPS / art/ / media/)",current?.mediaId?"":current?.url||"",value=>{
-  if(value&&!okUrl(value)){message("⚠️ Pautan gambar tidak sah.");return;}
+  if(value&&!okUrl(value)){message(" Pautan gambar tidak sah.");return;}
   current={type:"image",url:value,mediaId:"",mediaName:""};
   onSet(current);changed(b,config);void previewImage();
  });
  link.placeholder="https://.../gambar.png atau art/ais.png";
  const actions=e("div",undefined,"nge-actions");
- btn(actions,"🗑 Buang Gambar",()=>{current={type:"image",url:""};onSet(current);link.value="";changed(b,config);void previewImage();});
+ btn(actions," Buang Gambar",()=>{current={type:"image",url:""};onSet(current);link.value="";changed(b,config);void previewImage();});
  block.append(actions);parent.append(block);
 }
 function render(){
@@ -83,10 +83,10 @@ function render(){
  const b=b6();if(!b)return;
  const cfg=configFor(b);
  const root=e("details");root.id="iceNinjaTeacherPanel";root.open=true;
- root.append(e("summary","🎮 Sunting Game — MISI PENJAGA BUMI"));
+ root.append(e("summary"," Sunting Game — MISI PENJAGA BUMI"));
  root.append(e("p","第六本书专用：编辑问题、四个答案、正确答案、图片、背景与结算画面。其他 Guru 功能不会改变。","nge-note"));
  const appearance=e("section",undefined,"nge-section");
- appearance.append(e("h3","🎨 Reka Bentuk Permainan"));
+ appearance.append(e("h3"," Reka Bentuk Permainan"));
  const common=e("div",undefined,"nge-grid");
  field(common,"Tajuk Permainan",cfg.title,v=>{cfg.title=v;changed(b,cfg);});
  field(common,"Subtajuk",cfg.subtitle,v=>{cfg.subtitle=v;changed(b,cfg);});
@@ -96,7 +96,7 @@ function render(){
  appearance.append(common);
  field(appearance,"Arahan / Pengenalan",cfg.intro,v=>{cfg.intro=v;changed(b,cfg);},true);
  field(appearance,"Mesej Penamat",cfg.finishMessage,v=>{cfg.finishMessage=v;changed(b,cfg);},true);
- appearance.append(e("h4","🖼️ Upload Background & Reka Bentuk"));
+ appearance.append(e("h4"," Upload Background & Reka Bentuk"));
  const assets=e("div",undefined,"nge-grid");
  for(const [key,label] of [
   ["background","Latar permainan"],
@@ -108,7 +108,7 @@ function render(){
   uploadBox(assets,label,cfg.assets[key],value=>{cfg.assets[key]=value;changed(b,cfg);},b,cfg);
  }
  appearance.append(assets);root.append(appearance);
- const bank=e("section",undefined,"nge-section");bank.append(e("h3","🧩 Bank Soalan"));
+ const bank=e("section",undefined,"nge-section");bank.append(e("h3"," Bank Soalan"));
  const tools=e("div",undefined,"nge-actions");
  const choice=e("select");choice.className="nge-select";
  cfg.questions.forEach((q,i)=>{const option=e("option",(i+1)+". "+(q.q||"Soalan").slice(0,40));option.value=i;choice.append(option);});
@@ -116,13 +116,13 @@ function render(){
  choice.onchange=()=>{qIndex=Number(choice.value);render();};tools.append(choice);
  btn(tools,"+ Tambah Soalan",()=>{
   cfg.questions.push({q:"Soalan baharu?",explain:"",points:10,correct:0,
-   answers:[1,2,3,4].map(i=>({text:"Jawapan "+i,emoji:"❄️",image:{type:"image",url:""}}))});
+   answers:[1,2,3,4].map(i=>({text:"Jawapan "+i,image:{type:"image",url:""}}))});
   qIndex=cfg.questions.length-1;void persist(b,cfg);render();
  });
- btn(tools,"📄 Duplikasi",()=>{cfg.questions.splice(qIndex+1,0,clone(cfg.questions[qIndex]));qIndex++;void persist(b,cfg);render();});
+ btn(tools," Duplikasi",()=>{cfg.questions.splice(qIndex+1,0,clone(cfg.questions[qIndex]));qIndex++;void persist(b,cfg);render();});
  btn(tools,"↑",()=>{if(qIndex<1)return;[cfg.questions[qIndex],cfg.questions[qIndex-1]]=[cfg.questions[qIndex-1],cfg.questions[qIndex]];qIndex--;void persist(b,cfg);render();});
  btn(tools,"↓",()=>{if(qIndex>=cfg.questions.length-1)return;[cfg.questions[qIndex],cfg.questions[qIndex+1]]=[cfg.questions[qIndex+1],cfg.questions[qIndex]];qIndex++;void persist(b,cfg);render();});
- btn(tools,"🗑 Padam",()=>{if(cfg.questions.length<=1){message("至少保留一道题目。");return;}if(!confirm("Padam soalan ini?"))return;cfg.questions.splice(qIndex,1);qIndex=Math.max(0,qIndex-1);void persist(b,cfg);render();});
+ btn(tools," Padam",()=>{if(cfg.questions.length<=1){message("至少保留一道题目。");return;}if(!confirm("Padam soalan ini?"))return;cfg.questions.splice(qIndex,1);qIndex=Math.max(0,qIndex-1);void persist(b,cfg);render();});
  bank.append(tools);
  const q=cfg.questions[qIndex];
  if(q){
@@ -130,9 +130,9 @@ function render(){
   field(bank,"Penjelasan selepas jawapan betul",q.explain,v=>{q.explain=v;changed(b,cfg);},true);
   const score=field(bank,"Markah (1–100)",q.points??10,v=>{q.points=Math.max(1,Math.min(100,Number(v)||10));changed(b,cfg);},false,"number");
   score.min="1";score.max="100";
-  bank.append(e("p","每道题有四个答案；答案可只有照片、只有文字，或照片加文字。选择一个正确答案。","nge-note"));
+  bank.append(e("p","每道题有四个答案；可以显示上传的图片、文字或图片加文字，不再使用 emoji。选择一个正确答案。","nge-note"));
   for(let i=0;i<4;i++){
-   if(!q.answers[i])q.answers[i]={text:"Jawapan "+(i+1),emoji:"❄️",image:{type:"image",url:""}};
+   if(!q.answers[i])q.answers[i]={text:"Jawapan "+(i+1),image:{type:"image",url:""}};
    const a=q.answers[i],answer=e("div",undefined,"nge-answer");
    if(Number(q.correct)===i)answer.classList.add("nge-correct");
    answer.append(e("h4","Jawapan "+String.fromCharCode(65+i)));
@@ -141,7 +141,7 @@ function render(){
    tick.onchange=()=>{q.correct=i;changed(b,cfg);render();};radio.prepend(tick);answer.append(radio);
    const columns=e("div",undefined,"nge-grid");
    field(columns,"Teks (boleh kosong)",a.text,v=>{a.text=v;changed(b,cfg);});
-   field(columns,"Emoji (boleh kosong)",a.emoji,v=>{a.emoji=v;changed(b,cfg);});
+
    answer.append(columns);
    uploadBox(answer,"Upload gambar Jawapan "+String.fromCharCode(65+i),a.image,value=>{a.image=value;changed(b,cfg);},b,cfg);
    bank.append(answer);
@@ -149,9 +149,9 @@ function render(){
  }
  root.append(bank);
  const actions=e("div",undefined,"nge-actions");
- btn(actions,"💾 Simpan Permainan",()=>void persist(b,cfg));
- btn(actions,"👁 Pratonton Game",async()=>{if(await persist(b,cfg))window.openBook?.(window.IceEditingBook?.getIndex?.());});
- btn(actions,"⬇ Eksport JSON / ZIP",()=>void window.IceSiteCore?.download?.());
+ btn(actions," Simpan Permainan",()=>void persist(b,cfg));
+ btn(actions," Pratonton Game",async()=>{if(await persist(b,cfg))window.openBook?.(window.IceEditingBook?.getIndex?.());});
+ btn(actions," Eksport JSON / ZIP",()=>void window.IceSiteCore?.download?.());
  root.append(actions);
  const status=e("p","","nge-note");status.id="ngeStatus";status.setAttribute("role","status");root.append(status);
  document.getElementById("editFields")?.prepend(root);
