@@ -70,6 +70,7 @@ const mount=document.createElement("section");mount.id="iceNinjaMount";mount.hid
 document.getElementById("reader")?.querySelector(".reader-head")?.insertAdjacentElement("afterend",mount);
 let active=false,mode="intro",questionIndex=0,points=0,combo=0,correctAnswers=0,wrongAnswers=0,selected=-1,hovered=-1,hoverSince=0,locked=-1,fistSince=0,armed=true,pending=false;
 let cursorX=.5,cursorY=.5,remaining=[],currentQuestion=null,feedbackTimer=0,transitionTimer=0,currentSet=null;
+const wrongLog=new Map();let reviewIndices=[],reviewAt=0;
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function area(){return mount.querySelector(".ninja-arena");}
 function status(message){const x=mount.querySelector(".ninja-feedback");if(x)x.textContent=message;}
@@ -119,7 +120,7 @@ function shuffleOptions(){
  return order;
 }
 function startGame(){
- points=0;combo=0;correctAnswers=0;wrongAnswers=0;questionIndex=0;remaining=questions.map((_,i)=>i);
+ points=0;combo=0;correctAnswers=0;wrongAnswers=0;questionIndex=0;remaining=questions.map((_,i)=>i);wrongLog.clear();reviewIndices=[];reviewAt=0;
  nextQuestion();
 }
 function nextQuestion(){
@@ -197,6 +198,8 @@ function submitChoice(slot){
   transitionTimer=setTimeout(()=>{questionIndex++;nextQuestion();},2100);
  }else{
   wrongAnswers++;combo=0;
+  if(!wrongLog.has(questionIndex))wrongLog.set(questionIndex,new Set());
+  wrongLog.get(questionIndex).add(optionIndex);
   button?.classList.add("ninja-wrong");
   status("💙 Belum tepat! Cuba sasaran yang lain. Tiada markah ditolak.");
   transitionTimer=setTimeout(()=>{
@@ -206,15 +209,70 @@ function submitChoice(slot){
   },1050);
  }
 }
+function answerName(answer){
+ const a=Array.isArray(answer)?{text:answer[1]}:answer||{};
+ return String(a.text||"").trim()||"Jawapan bergambar";
+}
+function reviewWrong(){
+ return [...wrongLog.keys()].sort((a,b)=>a-b);
+}
+function showReview(){
+ clearTimers();mode="review";pending=false;
+ const questionNumber=reviewIndices[reviewAt];
+ if(questionNumber===undefined){showFinish();return;}
+ const q=questions[questionNumber],wrong=wrongLog.get(questionNumber)||new Set();
+ const correctIndex=Number(q.correct)||0;
+ shell('<div class="ninja-review"><p class="ninja-review-kicker">SEMAKAN · SOALAN '+(questionNumber+1)+' / '+questions.length+'</p>'+
+ '<h2>'+esc(q.q)+'</h2>'+
+ '<p class="ninja-review-context">'+(wrong.size?
+ 'Kamu pernah memilih '+wrong.size+' jawapan kurang tepat. Lihat pembetulan di bawah.':
+ 'Soalan ini telah dijawab dengan betul tanpa kesilapan.')+'</p>'+
+ '<div class="ninja-review-options">'+(q.answers||[]).slice(0,4).map((answer,i)=>
+ '<div class="ninja-review-choice'+(i===correctIndex?' is-right':'')+(wrong.has(i)?' is-wrong':'')+'">'+
+ '<div class="ninja-review-choice-media">'+answerHTML(answer)+'</div>'+
+ '<div class="ninja-review-tag">'+(i===correctIndex?'JAWAPAN BETUL':wrong.has(i)?'JAWAPAN SALAH DIPILIH':'PILIHAN '+String.fromCharCode(65+i))+'</div></div>').join("")+'</div>'+
+ '<div class="ninja-review-explanation"><strong>Penjelasan Jawapan</strong><p>'+esc(q.explain||"Lihat jawapan betul di atas.")+'</p></div>'+
+ '<p class="ninja-review-counter">Semakan '+(reviewAt+1)+' daripada '+reviewIndices.length+'</p>'+
+ '<div class="ninja-bottom"><button id="ninjaReviewPrev" class="secondary">Soalan Sebelumnya</button>'+
+ '<button id="ninjaReviewNext">Soalan Seterusnya</button>'+
+ '<button id="ninjaReviewBack" class="secondary">Kembali ke Keputusan</button></div></div>');
+ mount.querySelector("#ninjaReviewPrev").disabled=reviewAt===0;
+ mount.querySelector("#ninjaReviewNext").disabled=reviewAt>=reviewIndices.length-1;
+ mount.querySelector("#ninjaReviewPrev").onclick=()=>{reviewAt--;showReview();};
+ mount.querySelector("#ninjaReviewNext").onclick=()=>{reviewAt++;showReview();};
+ mount.querySelector("#ninjaReviewBack").onclick=showFinish;
+ window.IceBookMedia?.hydrate?.(mount);
+}
+function openReview(indices,index){
+ reviewIndices=indices.slice();
+ reviewAt=Math.max(0,reviewIndices.indexOf(index));
+ showReview();
+}
 function showFinish(){
- clearTimers();mode="finish";pending=false;const cfg=config();
- shell('<div class="ninja-finish"><div class="ninja-mascot">🏆🦣❄️</div>'+
+ clearTimers();mode="finish";pending=false;
+ const cfg=config(),wrong=reviewWrong();
+ const total=questions.reduce((sum,q)=>sum+Math.max(1,Math.min(100,Number(q.points)||10)),0);
+ shell('<div class="ninja-finish"><div class="ninja-ice-crest" aria-hidden="true"><span></span><span></span><span></span></div>'+
  '<h2>'+esc(cfg.finishTitle)+'</h2>'+
- '<p>Kamu berjaya melengkapkan semua misi Zaman Air Batu!</p>'+
- '<div class="ninja-stats"><span class="ninja-stat">⭐ Jumlah markah <strong>'+points+' / '+questions.reduce((sum,q)=>sum+Math.max(1,Math.min(100,Number(q.points)||10)),0)+'</strong></span>'+
- '<span class="ninja-stat">✅ Jawapan betul <strong>'+correctAnswers+' / '+questions.length+'</strong></span></div>'+
- '<p>'+esc(cfg.finishMessage)+'</p>'+
- '<div class="ninja-bottom"><button id="ninjaAgain">↻ MAIN SEMULA</button><button id="ninjaBack" class="secondary">📚 Kembali ke Rak Buku</button></div></div>');
+ '<p>Kamu berjaya melengkapkan semua soalan Zaman Air Batu.</p>'+
+ '<div class="ninja-stats"><span class="ninja-stat">Jumlah Markah <strong>'+points+' / '+total+'</strong></span>'+
+ '<span class="ninja-stat">Jawapan Betul <strong>'+correctAnswers+' / '+questions.length+'</strong></span>'+
+ '<span class="ninja-stat">Soalan Perlu Disemak <strong>'+wrong.length+'</strong></span></div>'+
+ '<div class="ninja-mistake-summary"><h3>Semak Kesilapan Saya</h3>'+
+ (wrong.length?'<p>Pilih soalan yang pernah dijawab salah untuk melihat jawapan yang betul dan sebabnya.</p>'+
+ '<div class="ninja-mistake-list">'+wrong.map(i=>'<button class="ninja-mistake-item" data-review-question="'+i+'">'+
+ '<strong>Soalan '+(i+1)+'</strong><span>'+esc(questions[i].q)+'</span><small>Lihat pembetulan</small></button>').join("")+'</div>':
+ '<p>Tiada kesilapan direkodkan. Kamu juga boleh menyemak semua soalan.</p>')+
+ '</div><p>'+esc(cfg.finishMessage)+'</p>'+
+ '<div class="ninja-bottom">'+(wrong.length?'<button id="ninjaReviewWrong">Semak Semua Soalan Salah</button>':'')+
+ '<button id="ninjaReviewAll" class="secondary">Semak Semua Soalan</button>'+
+ '<button id="ninjaAgain">Main Semula</button>'+
+ '<button id="ninjaBack" class="secondary">Kembali ke Rak Buku</button></div></div>');
+ mount.querySelectorAll("[data-review-question]").forEach(button=>{
+  button.onclick=()=>openReview(wrong,Number(button.dataset.reviewQuestion));
+ });
+ if(wrong.length)mount.querySelector("#ninjaReviewWrong").onclick=()=>openReview(wrong,wrong[0]);
+ mount.querySelector("#ninjaReviewAll").onclick=()=>openReview(questions.map((_,i)=>i),0);
  mount.querySelector("#ninjaAgain").onclick=startGame;
  mount.querySelector("#ninjaBack").onclick=()=>window.home?.();
 }
