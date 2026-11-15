@@ -99,3 +99,5 @@ body.ice-ninja-active #gesturePanel video{max-height:130px}
 #iceNinjaMount .ninja-cursor{background-image:var(--ninja-cursor-url,none);background-size:contain;background-repeat:no-repeat;background-position:center;min-width:52px;min-height:52px}
 #iceNinjaMount .ninja-cursor:has(+ .none){visibility:visible}
 @media(max-width:650px){#iceNinjaMount .ninja-answer-photo{height:59px;width:min(80px,70%)}}
+
+#iceNinjaMount .ninja-game.ninja-has-custom-cursor .ninja-cursor{font-size:0!important;width:65px;height:65px}
