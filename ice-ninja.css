@@ -83,3 +83,8 @@ body.ice-ninja-active #gesturePanel video{max-height:130px}
  body.ice-ninja-active #gesturePanel{max-height:40vh;width:min(220px,57vw)}
  body.ice-ninja-active #gesturePanel .gesture-hint{font-size:11px}
 }
+/* Live tracking visibility for Ice Age answer aiming */
+.ninja-tracker{max-width:740px;margin:10px auto;padding:10px 13px;border:2px solid #a5eef6;border-radius:14px;background:#124a78e6;color:#f1fdff;font-weight:700;font-size:.92rem;text-align:center;line-height:1.5}
+.ninja-cursor{z-index:25!important;font-size:3.3rem!important;filter:drop-shadow(0 0 8px #fffbd9) drop-shadow(0 4px 5px #164471)!important;will-change:left,top;transition:left .055s linear,top .055s linear!important}
+.ninja-cursor.visible{display:block!important}
+.ninja-cursor[data-pose=tracking]{opacity:.75}
