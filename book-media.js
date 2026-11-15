@@ -122,6 +122,17 @@ async function downloadSingle(id){
 async function getReferencedFiles(){
  const map=new Map();
  for(const book of window.IceSiteData?.getBooks?.()||[]){
+  // Only the special sixth book stores custom game artwork in gameConfig.
+  if(book.id==="b6"&&book.gameConfig){
+   const cfg=book.gameConfig;
+   const add=asset=>{
+    if(asset&&asset.mediaId&&typeof asset.url==="string"&&asset.url.startsWith("media/"))map.set(asset.mediaId,asset.url);
+   };
+   for(const asset of Object.values(cfg.assets||{}))add(asset);
+   for(const question of cfg.questions||[]){
+    for(const answer of question.answers||[])add(answer?.image);
+   }
+  }
   for(const track of book.audioTracks||[]){
    if(track?.mediaId&&track.url?.startsWith("media/"))map.set(track.mediaId,track.url);
   }
