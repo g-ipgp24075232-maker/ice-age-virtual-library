@@ -101,3 +101,88 @@ body.ice-ninja-active #gesturePanel video{max-height:130px}
 @media(max-width:650px){#iceNinjaMount .ninja-answer-photo{height:59px;width:min(80px,70%)}}
 
 #iceNinjaMount .ninja-game.ninja-has-custom-cursor .ninja-cursor{font-size:0!important;width:65px;height:65px}
+
+/* Book six: real ice fractures (not emoji confetti) and answer review. */
+#iceNinjaMount .ninja-ice-crest{position:relative;width:105px;height:100px;margin:0 auto 6px;filter:drop-shadow(0 8px 10px #0c315e99)}
+#iceNinjaMount .ninja-ice-crest::before{content:"";display:block;width:100%;height:100%;
+ clip-path:polygon(49% 0,84% 21%,95% 68%,54% 100%,9% 70%,17% 24%);
+ background:linear-gradient(142deg,#f6ffff 0%,#a1e6fa 31%,#5ea5d1 65%,#246a9a 100%);
+ border:1px solid #d6faff;box-shadow:inset 12px 13px 24px #e3ffff}
+#iceNinjaMount .ninja-ice-crest::after{content:"";position:absolute;inset:16px 24px;
+ clip-path:polygon(50% 0,78% 30%,55% 95%,25% 69%);
+ background:linear-gradient(160deg,#fffef5dd,#b3ffff44);opacity:.85}
+#iceNinjaMount .ninja-start .ninja-howto{gap:12px}
+#iceNinjaMount .ninja-step-number{font-size:1.3rem;display:block;border-radius:50%;
+ background:#d6f5fb;color:#225d86;width:45px;height:45px;line-height:45px;margin:0 auto 9px}
+#iceNinjaMount .ninja-fragment{position:absolute!important;z-index:18!important;
+ box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:5px;border:4px solid #b1f4ff;border-radius:40% 54% 43% 52%;padding:6px;
+ background-image:var(--ninja-answer-bg,radial-gradient(ellipse at 34% 22%,#feffff 0 8%,#b3eaf5 19%,var(--ninja-crystal,#77b8d8) 65%,#2786b6 95%));
+ background-size:cover;background-position:center;color:#113f60;
+ box-shadow:inset -9px -11px 13px #177bad69,inset 7px 9px 15px #faffffbf,0 10px 18px #052b516a;
+ pointer-events:none!important;opacity:1!important;transform:translate3d(0,0,0);
+ animation:none!important;transition:none!important;will-change:transform,opacity,filter}
+#iceNinjaMount .ninja-fragment .ninja-lock-meter{display:none}
+#iceNinjaMount .ninja-fragment .ninja-label{max-width:90%;font-weight:900;font-size:clamp(.88rem,1.7vw,1.15rem);text-align:center}
+#iceNinjaMount .ninja-fragment .ninja-answer-photo{height:84px;width:min(105px,65%);object-fit:contain}
+#iceNinjaMount .ninja-fragment.ninja-fragment-fly{
+ animation:ninjaFragmentFly 1.08s cubic-bezier(.16,.6,.32,1) var(--delay,0ms) both!important}
+@keyframes ninjaFragmentFly{
+ 0%{transform:translate3d(0,0,0) rotate(0deg) scale(1);opacity:1;filter:brightness(1.35)}
+ 23%{opacity:1;filter:brightness(1.8) drop-shadow(0 0 7px #f8ffff)}
+ 100%{transform:translate3d(var(--dx),var(--dy),0) rotate(var(--spin)) scale(.58);opacity:0;filter:brightness(.7)}
+}
+#iceNinjaMount .ninja-impact{animation:ninjaIceImpact .23s ease-out both!important;pointer-events:none!important}
+@keyframes ninjaIceImpact{0%{transform:scale(1);filter:brightness(1)}
+ 55%{transform:scale(1.1);filter:brightness(2)}
+ 100%{transform:scale(1);filter:brightness(1.4)}}
+#iceNinjaMount .ninja-crack-overlay{position:absolute;z-index:22;pointer-events:none;
+ background-image:
+ linear-gradient(36deg,transparent 46%,#fff 47%,#e3fcff 49%,transparent 52%),
+ linear-gradient(121deg,transparent 45%,#fff 47%,#b9f4ff 49%,transparent 52%),
+ linear-gradient(87deg,transparent 47%,#fff 48%,transparent 50%),
+ linear-gradient(153deg,transparent 47%,#dfffff 49%,transparent 51%);
+ background-size:100% 100%;filter:drop-shadow(0 0 9px #fff);
+ animation:ninjaCrackFlash .26s ease-out both}
+@keyframes ninjaCrackFlash{0%{transform:scale(.4);opacity:0}30%{transform:scale(1.07);opacity:1}
+ 100%{transform:scale(1.14);opacity:0}}
+#iceNinjaMount .ninja-cursor{font-size:0!important;width:58px;height:58px;
+ display:none;align-items:center;justify-content:center;text-align:center;color:#f6ffff;
+ background-color:#28689bbb;border:3px solid #e3faff;border-radius:48%;
+ box-shadow:0 0 12px #f2ffff99;font-weight:900;letter-spacing:.04em;line-height:1;
+ font-family:Arial,sans-serif}
+#iceNinjaMount .ninja-cursor.visible{display:flex!important;font-size:.65rem!important}
+#iceNinjaMount .ninja-game.ninja-has-custom-cursor .ninja-cursor.visible{font-size:0!important;border:0;background-color:transparent}
+#iceNinjaMount .ninja-lock-meter{font-size:.58rem;letter-spacing:-.02em}
+#iceNinjaMount .ninja-review{max-width:900px;margin:0 auto;padding:14px 0 30px;text-align:center;display:grid;gap:14px}
+#iceNinjaMount .ninja-review h2{font-size:clamp(1.3rem,2.6vw,1.9rem);line-height:1.4;margin:0}
+#iceNinjaMount .ninja-review-kicker{letter-spacing:.05em;font-weight:900;color:#dcfaff;margin:0}
+#iceNinjaMount .ninja-review-context{margin:0 auto;line-height:1.5}
+#iceNinjaMount .ninja-review-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+#iceNinjaMount .ninja-review-choice{min-height:122px;border:3px solid #a4d7e9;
+ background:#e6f7f9f0;color:#205a7c;border-radius:18px;padding:13px;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+#iceNinjaMount .ninja-review-choice.is-right{border-color:#72b997;background:#e4fff1}
+#iceNinjaMount .ninja-review-choice.is-wrong{border-color:#d9898c;background:#fff0ed}
+#iceNinjaMount .ninja-review-choice-media{display:grid;gap:7px;justify-items:center;font-weight:bold;line-height:1.3}
+#iceNinjaMount .ninja-review-choice-media .ninja-answer-photo{height:80px;width:auto;max-width:95%;object-fit:contain}
+#iceNinjaMount .ninja-review-tag{font-size:.74rem;font-weight:900;letter-spacing:.05em}
+#iceNinjaMount .ninja-review-explanation{background:#e9f7ff;color:#265875;border-radius:16px;padding:15px;text-align:left}
+#iceNinjaMount .ninja-review-explanation p{margin:7px 0 0;line-height:1.55}
+#iceNinjaMount .ninja-review-counter{font-size:.84rem;color:#e5f8ff;margin:0}
+#iceNinjaMount .ninja-mistake-summary{width:min(770px,100%);background:#eaf8f9;color:#245775;border-radius:17px;padding:19px 17px;display:grid;gap:9px}
+#iceNinjaMount .ninja-mistake-summary h3{margin:0;font-size:1.3rem}
+#iceNinjaMount .ninja-mistake-summary p{margin:0;font-size:.9rem}
+#iceNinjaMount .ninja-mistake-list{display:grid;gap:9px;width:100%;max-height:410px;overflow:auto}
+#iceNinjaMount .ninja-mistake-item{border:2px solid #a9d4df;background:#fff!important;color:#225779!important;
+ box-shadow:none!important;border-radius:12px;padding:13px!important;font-size:.9rem!important;text-align:left!important;
+ display:grid;gap:4px;line-height:1.4;max-width:100%}
+#iceNinjaMount .ninja-mistake-item strong{font-size:1rem;color:#164b70}
+#iceNinjaMount .ninja-mistake-item small{color:#548398;text-decoration:underline}
+#iceNinjaMount .ninja-mistake-item:hover{background:#dbf7ff!important;border-color:#73b7c9}
+#iceNinjaMount .ninja-bottom button:disabled{opacity:.48;cursor:not-allowed}
+@media(max-width:650px){
+ #iceNinjaMount .ninja-review-options{grid-template-columns:1fr}
+ #iceNinjaMount .ninja-review-choice{min-height:86px}
+ #iceNinjaMount .ninja-fragment .ninja-answer-photo{height:60px}
+}
