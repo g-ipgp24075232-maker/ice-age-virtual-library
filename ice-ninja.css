@@ -1,0 +1,85 @@
+/* Ice Age Ninja game — only shown inside MISI PENJAGA BUMI. */
+#reader.ice-ninja-mode{max-width:1150px;background:linear-gradient(145deg,#d7f6ff,#eafcf7);padding:17px}
+#reader.ice-ninja-mode #bookStage,
+#reader.ice-ninja-mode .flip-guide,
+#reader.ice-ninja-mode .controls,
+#reader.ice-ninja-mode #siteBlocks-reader,
+#reader.ice-ninja-mode #bookNarrationPanel,
+#reader.ice-ninja-mode #narrationReaderPanel,
+#reader.ice-ninja-mode #narrationTTS,
+#reader.ice-ninja-mode #mp3StudentStatus,
+#reader.ice-ninja-mode .flip-edge{display:none!important}
+#reader.ice-ninja-mode #progress{display:none}
+#iceNinjaMount[hidden]{display:none!important}
+#iceNinjaMount{color:#e7faff;font-family:"Trebuchet MS",Verdana,Arial,sans-serif;margin:15px auto 5px;max-width:1060px}
+.ninja-game{position:relative;isolation:isolate;overflow:hidden;border:6px solid #caeff3;border-radius:28px;min-height:650px;padding:22px clamp(12px,3vw,28px) 28px;
+background:linear-gradient(180deg,#0d3d6be6 0%,#2b7398cc 48%,#9ac3c3b5 100%),url("art/ice-age-landscape.svg") center/cover;
+box-shadow:inset 0 0 30px #d8faff75,0 13px 30px #1f5d887d}
+.ninja-game:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.75;background:
+radial-gradient(circle at 18% 16%,#ffffffd0 1px,transparent 3px),
+radial-gradient(circle at 74% 37%,#ffffffb0 2px,transparent 4px),
+radial-gradient(circle at 51% 71%,#ffffff90 1px,transparent 4px);background-size:70px 75px,123px 110px,88px 93px;animation:ninjaSnow 24s linear infinite}
+@keyframes ninjaSnow{to{background-position:80px 350px,-150px 420px,120px 600px}}
+.ninja-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:15px}
+.ninja-brand{display:flex;align-items:center;gap:10px;font-size:clamp(1.05rem,2.2vw,1.5rem);font-weight:900;text-shadow:0 3px 5px #07345f}
+.ninja-top-icon{font-size:2.2rem;filter:drop-shadow(0 3px 4px #103a5c)}
+.ninja-stats{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ninja-stat{border:2px solid #c4edfc80;background:#123c6dbb;padding:7px 11px;border-radius:12px;font-weight:800;font-size:.9rem}
+.ninja-stat strong{color:#ffe6a1}
+.ninja-question{background:linear-gradient(125deg,#f6fcffe8,#e1f9f1ef);padding:18px 22px;border:4px solid #ffffffbc;border-radius:22px;color:#174a71;text-align:center;box-shadow:0 5px 18px #072d547a}
+.ninja-question small{display:block;letter-spacing:1px;font-weight:800;color:#397a8d}
+.ninja-question h2{font-size:clamp(1.15rem,2.4vw,1.7rem);line-height:1.35;margin:9px 0 4px;color:#174f75}
+.ninja-progress{height:11px;background:#17456f;border:2px solid #eafaff90;border-radius:30px;overflow:hidden;margin:14px auto;max-width:680px}
+.ninja-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#8be5ed,#ffe7a2);transition:width .45s}
+.ninja-arena{position:relative;min-height:375px;padding:18px 12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,155px);gap:15px;max-width:730px;margin:0 auto;touch-action:pan-y}
+.ninja-target{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:145px;border:4px solid #b1f4ff;border-radius:40% 54% 43% 52%;overflow:visible;
+background:radial-gradient(ellipse at 34% 22%,#fefeffee 0 8%,#b3eaf5e0 19%,#77b8d8df 55%,#2786b6 95%);
+color:#113f60;box-shadow:inset -9px -11px 13px #177bad69,inset 7px 9px 15px #faffffbf,0 10px 0 #194f7b9a,0 17px 18px #052b516a;
+transform:translateY(0);transition:filter .18s,box-shadow .2s,outline .2s;animation:ninjaFloat 3s ease-in-out infinite}
+.ninja-target:nth-child(2){animation-delay:-.9s}
+.ninja-target:nth-child(3){animation-delay:-1.7s}
+.ninja-target:nth-child(4){animation-delay:-2.3s}
+.ninja-target:hover,.ninja-target:focus-visible{filter:brightness(1.09);outline:4px solid #ffe5a1;outline-offset:2px}
+.ninja-target .ninja-emoji{font-size:clamp(2.3rem,5vw,3.5rem);line-height:1.1;filter:drop-shadow(0 3px 3px #12456b64)}
+.ninja-target .ninja-label{max-width:90%;font-size:clamp(.88rem,1.7vw,1.15rem);font-weight:900;line-height:1.2;text-align:center;text-wrap:balance}
+.ninja-target.ninja-hover{outline:5px dashed #fff1a1;outline-offset:4px}
+.ninja-target.ninja-locked{outline:7px solid #ffe278;outline-offset:3px;box-shadow:0 0 0 6px #ffcc7570,0 0 36px 12px #fff1b1dd,inset 8px 9px 14px #f5ffffef;filter:brightness(1.12)}
+.ninja-target.ninja-broken{animation:ninjaBreak .55s ease-in forwards!important;pointer-events:none}
+.ninja-target.ninja-wrong{animation:ninjaWrong .6s ease-out!important;background:radial-gradient(circle,#fff2ee,#d2a3aa,#a94e71)}
+.ninja-target:disabled{opacity:.55;cursor:default}
+@keyframes ninjaFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-11px) rotate(1deg)}}
+@keyframes ninjaBreak{0%{transform:scale(1);opacity:1}35%{transform:scale(1.22) rotate(8deg);opacity:.95}100%{transform:scale(.4) rotate(-20deg);opacity:0}}
+@keyframes ninjaWrong{25%{transform:translateX(-12px) rotate(-3deg)}50%{transform:translateX(10px) rotate(3deg)}70%{transform:translateX(-5px)}}
+.ninja-lock-meter{position:absolute;right:-5px;top:-12px;background:#173e6e;color:#fff2aa;border:3px solid #ffe5a5;border-radius:50%;width:41px;height:41px;display:grid;place-items:center;font-size:.75rem;font-weight:900;z-index:2}
+.ninja-cursor{position:absolute;z-index:10;pointer-events:none;left:50%;top:50%;transform:translate(-50%,-50%);font-size:2.8rem;filter:drop-shadow(0 3px 6px #15375a);transition:left .12s,top .12s;display:none}
+.ninja-cursor.visible{display:block}
+.ninja-spark{position:absolute;z-index:15;font-size:1.6rem;pointer-events:none;left:50%;top:50%;animation:ninjaShards .75s cubic-bezier(.2,.7,.4,1) both}
+@keyframes ninjaShards{from{opacity:1;transform:translate(-50%,-50%) scale(.5)}to{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(1.25)}}
+.ninja-feedback{text-align:center;min-height:47px;margin:6px auto;padding:9px 15px;border:2px solid #9fe1ea91;border-radius:12px;background:#103d6fbc;max-width:780px;color:#fffaf0;font-size:1rem;font-weight:800}
+.ninja-bottom{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin-top:12px}
+#iceNinjaMount .ninja-bottom button,#iceNinjaMount .ninja-start button{font-size:.92rem;padding:10px 15px;background:linear-gradient(#ffe4a4,#eeb66c)!important;color:#513e25!important;border:2px solid #fffae1!important}
+#iceNinjaMount .ninja-bottom button.secondary{background:#e4f6f5!important;color:#1a506a!important}
+.ninja-guide{font-size:.88rem;text-align:center;line-height:1.6;color:#e6f9ff;text-shadow:0 1px 2px #173653;margin:9px auto;max-width:850px}
+.ninja-start,.ninja-finish{display:grid;justify-items:center;gap:13px;text-align:center;padding:55px 16px 65px}
+.ninja-start .ninja-mascot,.ninja-finish .ninja-mascot{font-size:5rem;filter:drop-shadow(0 8px 5px #0829448f);animation:ninjaFloat 4s infinite}
+.ninja-start h2,.ninja-finish h2{font-size:clamp(1.8rem,4.8vw,3rem);margin:0;text-shadow:0 4px #173f64}
+.ninja-start p,.ninja-finish p{max-width:640px;font-size:1.12rem;line-height:1.6;margin:0}
+.ninja-start .ninja-howto{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:min(720px,100%)}
+.ninja-howto div{background:#143f6ebc;border:2px solid #d1f4f2a8;border-radius:16px;padding:14px;font-weight:800}
+.ninja-howto span{display:block;font-size:2.3rem}
+#reader.ice-ninja-mode .reader-head{color:#1c5276}
+#reader.ice-ninja-mode .reader-head strong{display:none}
+body.ice-ninja-active #gesturePanel{right:auto!important;left:10px;bottom:10px;width:260px;max-height:56vh;overflow:auto;opacity:.96}
+body.ice-ninja-active #gesturePanel video{max-height:130px}
+@media(max-width:650px){
+ .ninja-game{padding:14px 8px 20px;border-width:4px;min-height:615px}
+ .ninja-arena{grid-template-rows:repeat(2,127px);gap:11px;padding:12px 6px;min-height:293px}
+ .ninja-target{min-height:119px;border-width:3px}
+ .ninja-target .ninja-emoji{font-size:2.2rem}
+ .ninja-top{justify-content:center;text-align:center}
+ .ninja-stats{justify-content:center}
+ .ninja-start .ninja-howto{grid-template-columns:1fr}
+ .ninja-start,.ninja-finish{padding:32px 9px}
+ body.ice-ninja-active #gesturePanel{max-height:40vh;width:min(220px,57vw)}
+ body.ice-ninja-active #gesturePanel .gesture-hint{font-size:11px}
+}
