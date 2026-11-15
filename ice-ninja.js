@@ -369,7 +369,7 @@ function handleHand(points,now,mirrored){
  const cursor=mount.querySelector(".ninja-cursor");
  if(cursor){
   cursor.classList.add("visible");
-  cursor.textContent=pose.fist?"GENGGAM":"TAPAK";
+  cursor.textContent=pose.fist?"✊":"✋";
   cursor.style.left=(smoothX*100)+"%";
   cursor.style.top=(smoothY*100)+"%";
   cursor.dataset.pose=pose.fist?"fist":pose.open?"palm":"tracking";
