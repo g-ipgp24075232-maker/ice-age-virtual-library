@@ -25,7 +25,7 @@ function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 function area(){return mount.querySelector(".ninja-arena");}
 function status(message){const x=mount.querySelector(".ninja-feedback");if(x)x.textContent=message;}
 function clearTimers(){if(feedbackTimer)clearTimeout(feedbackTimer);if(transitionTimer)clearTimeout(transitionTimer);feedbackTimer=transitionTimer=0;}
-function resetHand(){selected=-1;hovered=-1;hoverSince=0;locked=-1;fistSince=0;armed=true;}
+function resetHand(){selected=-1;hovered=-1;hoverSince=0;locked=-1;fistSince=0;armed=true;smoothX=null;smoothY=null;}
 function isActive(){return active&&mode==="question"&&!pending;}
 function enter(){
  exit();active=true;mode="intro";
@@ -87,7 +87,7 @@ function nextQuestion(){
  '<span class="ninja-label">'+esc(q.answers[answerIndex][1])+'</span></button>').join("")+
  '<span class="ninja-cursor" aria-hidden="true">✋</span></div>'+
  '<p class="ninja-feedback" role="status" aria-live="polite">✋ Gerakkan tapak tangan ke kristal, tunggu sehingga terkunci, kemudian ✊ genggam untuk memecahkan!</p>'+
- '<div class="ninja-guide">📸 Kamera diproses pada peranti sahaja. <b>Tiada kamera?</b> Klik kristal jawapan kemudian tekan PECAHKAN AIS.</div>'+
+ '<div id="ninjaTracking" class="ninja-tracker" role="status" aria-live="polite">📷 Tekan Kamera Gestur, kemudian gerakkan tangan untuk mengawal penunjuk ✋.</div><div class="ninja-guide">📸 Kamera diproses pada peranti sahaja. <b>Tiada kamera?</b> Klik kristal jawapan kemudian tekan PECAHKAN AIS.</div>'+
  '<div class="ninja-bottom"><button id="ninjaSmash">💥 PECAHKAN AIS</button><button id="ninjaCamera" class="secondary">✋ Kamera Gestur</button>'+
  '<button id="ninjaRestart" class="secondary">↻ Mula Semula</button></div>');
  for(const button of mount.querySelectorAll(".ninja-target")){
@@ -175,49 +175,104 @@ function startCamera(){
  if(camera.isActive?.())return;
  camera.start?.();
 }
+// The game cursor must track every detected hand, not only perfect palm/fist
+// classifications. Coordinates map to the visible answer crystals.
+let smoothX=null,smoothY=null,lastHandAt=0,handNotice="";
+function handNoticeUpdate(message){
+ const tag=mount.querySelector("#ninjaTracking");
+ if(tag&&tag.textContent!==message)tag.textContent=message;
+}
 function onHandLost(){
  if(!isActive())return;
- const cur=mount.querySelector(".ninja-cursor");cur?.classList.remove("visible");
- if(locked<0){hovered=-1;hoverSince=0;displayTarget(-1,0);}
- fistSince=0;
+ if(performance.now()-lastHandAt<270)return; // tolerate a couple dropped frames
+ const cur=mount.querySelector(".ninja-cursor");
+ cur?.classList.remove("visible");
+ handNoticeUpdate("📷 Tangan belum dikesan. Letakkan seluruh tapak tangan dalam kamera dan pastikan pencahayaan mencukupi.");
+ hovered=-1;hoverSince=0;fistSince=0;smoothX=null;smoothY=null;
+ if(locked<0)displayTarget(-1,0);
+}
+function palmPose(points){
+ // Compare fingertip and PIP-to-wrist lengths. A relaxed/partly bent palm is
+ // still tracked; classification is used only for locking and smashing.
+ const wrist=points[0];
+ let openCount=0,closedCount=0;
+ for(const [tip,pip,mcp] of [[8,6,5],[12,10,9],[16,14,13],[20,18,17]]){
+  const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  const tipW=d(points[tip],wrist),pipW=d(points[pip],wrist);
+  const tipBase=d(points[tip],points[mcp]),pipBase=d(points[pip],points[mcp]);
+  if(tipW>pipW*1.09&&tipBase>pipBase*1.08)openCount++;
+  else if(tipW<pipW*1.07||tipBase<pipBase*1.07)closedCount++;
+ }
+ return {open:openCount>=3, fist:closedCount>=3&&openCount<=1,
+         extended:openCount,curled:closedCount};
+}
+function handTargetAt(x,y){
+ const arena=area();if(!arena)return -1;
+ const rect=arena.getBoundingClientRect();
+ const atX=rect.left+rect.width*x,atY=rect.top+rect.height*y;
+ const targets=[...arena.querySelectorAll(".ninja-target")];
+ let hit=-1;
+ // Real DOM boxes, not an approximation of video quadrants.
+ for(let i=0;i<targets.length;i++){
+  const r=targets[i].getBoundingClientRect();
+  if(atX>=r.left&&atX<=r.right&&atY>=r.top&&atY<=r.bottom){hit=i;break;}
+ }
+ return hit;
 }
 function handleHand(points,now,mirrored){
  if(!isActive()||!Array.isArray(points)||points.length<21)return;
- const wrist=points[0],scale=Math.max(.001,Math.hypot(points[9].x-wrist.x,points[9].y-wrist.y));
- const curled=[8,12,16,20].filter((tip,i)=>{
-  const pip=[6,10,14,18][i];
-  return Math.hypot(points[tip].x-wrist.x,points[tip].y-wrist.y)<
-   Math.hypot(points[pip].x-wrist.x,points[pip].y-wrist.y)*1.16;
- }).length;
- const extended=[8,12,16,20].filter((tip,i)=>{
-  const pip=[6,10,14,18][i];
-  return Math.hypot(points[tip].x-wrist.x,points[tip].y-wrist.y)>
-    Math.hypot(points[pip].x-wrist.x,points[pip].y-wrist.y)*1.16;
- }).length;
- const fist=curled>=3&&extended<=1;
- const open=extended>=3&&!fist;
- if(!fist&&!open){fistSince=0;return;}
- if(open){armed=true;fistSince=0;}
- const hand=points[9];
- const x=Math.min(.98,Math.max(.02,mirrored?1-hand.x:hand.x));
- const y=Math.min(.98,Math.max(.02,hand.y));
+ const palm=points[9];
+ if(!Number.isFinite(palm.x)||!Number.isFinite(palm.y))return;
+ lastHandAt=performance.now();
+ const targetX=Math.max(.01,Math.min(.99,mirrored?1-palm.x:palm.x));
+ const targetY=Math.max(.01,Math.min(.99,palm.y));
+ // Light smoothing removes camera jitter while visibly tracking every frame.
+ smoothX=smoothX===null?targetX:smoothX*.53+targetX*.47;
+ smoothY=smoothY===null?targetY:smoothY*.53+targetY*.47;
+ const pose=palmPose(points);
  const cursor=mount.querySelector(".ninja-cursor");
  if(cursor){
-  cursor.classList.add("visible");cursor.textContent=fist?"✊":"✋";
-  cursor.style.left=(x*100)+"%";cursor.style.top=(y*100)+"%";
+  cursor.classList.add("visible");
+  cursor.textContent=pose.fist?"✊":"✋";
+  cursor.style.left=(smoothX*100)+"%";
+  cursor.style.top=(smoothY*100)+"%";
+  cursor.dataset.pose=pose.fist?"fist":pose.open?"palm":"tracking";
  }
- if(open){
-  const i=(y<.5?0:2)+(x<.5?0:1);
+ const hit=handTargetAt(smoothX,smoothY);
+ if(pose.fist){
+  handNoticeUpdate("✊ Genggaman dikesan. "+(locked>=0?"Pecahkan kristal terkunci!":"Buka tapak tangan dan kunci jawapan dahulu."));
+  if(locked>=0&&armed){
+   if(!fistSince)fistSince=now;
+   if(now-fistSince>=145){armed=false;submitChoice(locked);}
+  }else fistSince=0;
+  return;
+ }
+ fistSince=0;
+ if(!pose.open){
+  // Critical: NEVER freeze the cursor when fingers are partially curled.
+  handNoticeUpdate("✋ Tangan dikesan dan penunjuk bergerak. Buka sekurang-kurangnya 3 jari untuk mengunci kristal.");
+  if(locked<0){hovered=-1;hoverSince=0;displayTarget(-1,0);}
+  return;
+ }
+ armed=true;
+ handNoticeUpdate(locked>=0?"🔒 Kristal terkunci! Genggam tangan ✊ untuk memecahkannya.":
+  hit>=0?"✋ Tapak tangan dikesan — tahan di atas kristal untuk mengunci.":
+  "✋ Tapak tangan dikesan — gerakkan tangan ke atas satu kristal ais.");
+ if(locked>=0){
+  // Keep tracking even while locked. Moving deliberately to another crystal
+  // clears the old lock so children can correct their aim before smashing.
+  if(hit>=0&&hit!==locked){
+   if(hovered!==hit){hovered=hit;hoverSince=now;}
+   if(now-hoverSince>420){locked=-1;hoverSince=now;displayTarget(hit,0);}
+  }else{hovered=hit;hoverSince=now;}
   if(locked>=0){displayTarget(locked,1);return;}
-  if(i!==hovered){hovered=i;hoverSince=now;}
-  const ratio=Math.min(1,(now-hoverSince)/650);
-  displayTarget(i,ratio);
-  if(ratio>=1)lockChoice(i,"gesture");
- }else if(fist&&locked>=0&&armed){
-  if(!fistSince)fistSince=now;
-  if(now-fistSince>=175){armed=false;submitChoice(locked);}
  }
+ if(hit<0){hovered=-1;hoverSince=0;displayTarget(-1,0);return;}
+ if(hit!==hovered){hovered=hit;hoverSince=now;}
+ const ratio=Math.min(1,(now-hoverSince)/600);
+ displayTarget(hit,ratio);
+ if(ratio>=1)lockChoice(hit,"gesture");
 }
 window.IceNinja={isGameBook,enter,exit,isActive,isInGame:()=>active,handleHand,onHandLost,
- version:"ice-age-ninja-gesture-game-v1"};
+ version:"ice-age-ninja-hand-pointer-fix-v2"};
 })();
